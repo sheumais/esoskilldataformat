@@ -734,7 +734,7 @@ pub fn find_skill_data_filename(dir: &str) -> io::Result<String> {
     Err(io::Error::new(io::ErrorKind::NotFound, msg))
 }
 
-pub fn match_damage_type(damage_type: u16) -> Option<String> {
+pub fn match_damage_type(damage_type: &u16) -> Option<String> {
     match damage_type {
         1  => Some("Generic".to_string()),
         2  => Some("Physical".to_string()),
@@ -752,7 +752,7 @@ pub fn match_damage_type(damage_type: u16) -> Option<String> {
     }
 }
 
-pub fn skill_line_name(id: u32) -> Option<&'static str> {
+pub fn skill_line_name(id: &u32) -> Option<&'static str> {
     match id {
         // Weapon
         29 => Some("One Hand and Shield"),
@@ -924,7 +924,7 @@ pub fn skill_line_name(id: u32) -> Option<&'static str> {
     }
 }
 
-pub fn match_mechanic(mech: u8) -> Option<String> {
+pub fn match_mechanic(mech: &u8) -> Option<String> {
     match mech {
         0  => Some("None".to_string()),
         1  => Some("Magicka".to_string()),
@@ -937,10 +937,10 @@ pub fn match_mechanic(mech: u8) -> Option<String> {
     }
 }
 
-pub fn match_coefficient_type(coef: u8) -> Option<String> {
+pub fn match_coefficient_type(coef: &u8) -> Option<String> {
     match coef {
-        1 => Some("Unknown (1)".to_string()),
-        2 => Some("Unknown (2)".to_string()),
+        // 1 => Some("Unknown".to_string()),
+        // 2 => Some("Unknown".to_string()),
         4 => Some("Maximum Magicka".to_string()),
         7 => Some("Maximum Health".to_string()),
         8 => Some("Health Recovery".to_string()),
@@ -949,7 +949,7 @@ pub fn match_coefficient_type(coef: u8) -> Option<String> {
         25 => Some("Spell Damage".to_string()),
         29 => Some("Maximum Stamina".to_string()),
         35 => Some("Weapon Damage".to_string()),
-        36 => Some("Unknown (36)".to_string()),
+        // 36 => Some("Unknown".to_string()),
         _ => None,
     }
 }
@@ -967,7 +967,7 @@ pub fn load_ability_names(path: &str) -> HashMap<u32, String> {
         .collect()
 }
 
-pub fn ability_type_name(id: u8) -> Option<String> {
+pub fn ability_type_name(id: &u8) -> Option<String> {
     match id {
         0 => Some("None".to_string()),
         1 => Some("Damage".to_string()),
