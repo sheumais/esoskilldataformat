@@ -954,7 +954,6 @@ pub fn match_coefficient_type(coef: &u8) -> Option<String> {
     }
 }
 
-/// Load the ability name hashmap from the standard export path.
 pub fn load_ability_names(path: &str) -> HashMap<u32, String> {
     std::fs::read_to_string(path)
         .unwrap_or_default()
@@ -963,6 +962,18 @@ pub fn load_ability_names(path: &str) -> HashMap<u32, String> {
             let (id_str, name) = line.split_once(',')?;
             let id: u32 = id_str.trim().parse().ok()?;
             Some((id, name.trim().to_string()))
+        })
+        .collect()
+}
+
+pub fn load_tooltips(path: &str) -> HashMap<u32, String> {
+    std::fs::read_to_string(path)
+        .unwrap_or_default()
+        .lines()
+        .filter_map(|line| {
+            let (id_str, tooltip) = line.split_once(',')?;
+            let id: u32 = id_str.trim().parse().ok()?;
+            Some((id, tooltip.trim().to_string()))
         })
         .collect()
 }
@@ -1088,5 +1099,49 @@ pub fn ability_type_name(id: &u8) -> Option<String> {
         116 => Some("Night market unknown".to_string()),
         117 => Some("Mandatory snare".to_string()),
         _ => None,
+    }
+}
+
+pub fn tooltip_type(id: &u32) -> Option<String> {
+    match id {
+        3  => Some("ConditionalBuffActive".to_string()),          // with X active, e.g. ice avatar (IA/dungeon buff)
+        8  => Some("BuffGain".to_string()),                       // buff gain (links to named effect by id)
+        10 => Some("ActivationEffect".to_string()),               // activating X does ... (dread cellar side buffs)
+        16 => Some("ResourceGain".to_string()),                   // health / shield / stamina gain
+        17 => Some("MartialDamage".to_string()),                  // martial / melee damage
+        18 => Some("MagicalDamage".to_string()),                  // magical / ranged damage
+        19 => Some("TickRate".to_string()),                       // tick rate
+        20 => Some("Duration".to_string()),                       // duration (paired with 49, 53)
+        21 => Some("DeprecatedChampionPoints".to_string()),       // deprecated champion points
+        22 => Some("DeprecatedChampionPoints2".to_string()),      // deprecated champion points
+        31 => Some("IncreasedDurationVsMonsters".to_string()),    // increase duration against monsters
+        44 => Some("MinimumCooldown".to_string()),                // minimum time between occurrences
+        48 => Some("DeprecatedZeroDuration".to_string()),         // deprecated 0.0s (2 unused buffs)
+        49 => Some("SingleTargetDoT".to_string()),                // single-target damage over time
+        51 => Some("DeprecatedMultiHit".to_string()),             // multi-hit (no longer used)
+        52 => Some("SingleTargetHeal".to_string()),               // single-target heal
+        53 => Some("AreaHoT".to_string()),                        // area heal over time
+        55 => Some("Percentage".to_string()),                     // generic percentage value
+        56 => Some("IncreaseDurationOf".to_string()),             // increase duration of (another effect)
+        57 => Some("DeprecatedHalfSecondDuration".to_string()),   // deprecated 0.5s (3 unused buffs)
+        58 => Some("ReduceCostIncreaseRecovery".to_string()),     // reduce cost / increase recovery (mag/stam/etc.)
+        72 => Some("DeprecatedTriResourceGrant".to_string()),     // deprecated; grants health/stam/mag (id 68411)
+        73 => Some("DeprecatedArmourPercent".to_string()),        // deprecated; grants armour % (id 18690)
+        79 => Some("DeprecatedArmourMs".to_string()),             // deprecated; same as 73 but in milliseconds
+        90 => Some("SelfHeal".to_string()),                       // self heal
+        91 => Some("Knockback".to_string()),                      // knockback (suspected)
+        92 => Some("DeprecatedIncreasedChance".to_string()),      // deprecated; increase chance
+        93 => Some("DelayedStrike".to_string()),                  // delay until damage / called-down strike
+        96 => Some("StatPercentage".to_string()),                 // percentage of a stat (healing done, crit dmg, etc.)
+        97 => Some("ReduceHeatPercent".to_string()),              // reduce heat by a percentage
+        99 => Some("FlatConstant".to_string()),                   // flat constant - new with u49 (sets/skills)
+        100 => Some("PercentageConstant".to_string()),            // percentage constant - new with u49 (mythic/skills)
+        104 => Some("ThresholdBelowHealthPercent".to_string()),   // applies to enemies below X% health
+        105 => Some("BonusUpToPercent".to_string()),              // up to X% more
+        114 => Some("CompanionEffect".to_string()),               // your companion
+        121 => Some("BuffExplanationText".to_string()),           // buff/debuff explanation text (follows 8)
+        122 => Some("BuffExplanationText2".to_string()),          // additional buff/debuff explanation text
+        123 => Some("MajorMinorBuffGain".to_string()),            // major/minor buff gain
+        _   => None,
     }
 }
