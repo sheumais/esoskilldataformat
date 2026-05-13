@@ -5,6 +5,8 @@ use serde::Serialize;
 use serde::ser::SerializeSeq;
 use serde::Serializer;
 
+pub mod data_enum;
+
 pub fn serialize_array<S, T, const N: usize>(arr: &[T; N], s: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
@@ -149,7 +151,7 @@ pub struct SkillData34 {
     #[serde(skip_serializing_if = "is_zero_u16")]               pub u1a:            u16,
     #[serde(skip_serializing_if = "is_zero_u16")]               pub u1b:            u16,
     #[serde(skip_serializing_if = "is_zero_u32")]               pub zero4:          u32,
-    pub base_data:    SkillBaseData,
+    pub base_data:                                                                  SkillBaseData,
     #[serde(serialize_with = "serialize_array")]                pub flags:          [u8; FLAGSIZE],
     #[serde(skip_serializing_if = "is_zero_u32")]               pub size1:          u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list1:          Vec<u8>,
@@ -169,7 +171,7 @@ pub struct SkillData34 {
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list6a:         Vec<u32>,
     #[serde(skip_serializing_if = "is_zero_u32")]               pub size6b:         u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list6b:         Vec<u16>,
-    pub coef:         SkillCoef,
+    pub coef:                                                                       SkillCoef,
     #[serde(skip_serializing_if = "is_zero_u16")]               pub size7:          u16,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list7:          Vec<u32>,
     #[serde(serialize_with = "serialize_array")]                pub u8:             [u32; U8SIZE],
@@ -183,7 +185,7 @@ pub struct SkillData34 {
     #[serde(skip_serializing_if = "is_zero_u32")]               pub size11:         u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list11:         Vec<List11Data>,
     #[serde(serialize_with = "serialize_array")]                pub u11:            [u8; U11SIZE],
-    pub u12:          [u8; U12SIZE],
+    pub u12:                                                                        [u8; U12SIZE],
     #[serde(skip_serializing_if = "is_zero_u32")]               pub size13:         u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list13:         Vec<u8>,
     #[serde(serialize_with = "serialize_array")]                pub u13:            [u32; U13SIZE],
@@ -526,7 +528,7 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
         bd.value1             = r.read_dword_be()?;
         bd.value2             = r.read_dword_be()?;
         bd.range              = r.read_dword_be()?;
-        bd.ability_type                 = r.read_byte()?;
+        bd.ability_type       = r.read_byte()?;
         bd.u2                 = r.read_byte()?;
         bd.z4                 = r.read_word_be()?;
         bd.z5                 = r.read_word_be()?;
@@ -734,226 +736,6 @@ pub fn find_skill_data_filename(dir: &str) -> io::Result<String> {
     Err(io::Error::new(io::ErrorKind::NotFound, msg))
 }
 
-pub fn match_damage_type(damage_type: &u16) -> Option<String> {
-    match damage_type {
-        1  => Some("Generic".to_string()),
-        2  => Some("Physical".to_string()),
-        3  => Some("Flame".to_string()),
-        4  => Some("Shock".to_string()),
-        5  => Some("Oblivion".to_string()),
-        6  => Some("Frost".to_string()),
-        7  => Some("Earth".to_string()),
-        8  => Some("Magic".to_string()),
-        9  => Some("Drown".to_string()),
-        10 => Some("Disease".to_string()),
-        11 => Some("Poison".to_string()),
-        12 => Some("Bleed".to_string()),
-        _  => None,
-    }
-}
-
-pub fn skill_line_name(id: &u32) -> Option<&'static str> {
-    match id {
-        // Weapon
-        29 => Some("One Hand and Shield"),
-        30 => Some("Two Handed"),
-        31 => Some("Dual Wield"),
-        32 => Some("Bow"),
-        33 => Some("Destruction Staff"),
-        34 => Some("Restoration Staff"),
-        // Armor
-        24 => Some("Light Armour"),
-        25 => Some("Medium Armour"),
-        26 => Some("Heavy Armour"),
-        // Templar
-        22 => Some("Aedric Spear"),
-        27 => Some("Dawn's Wrath"),
-        28 => Some("Restoring Light"),
-        // Dragonknight
-        35 => Some("Ardent Flame"),
-        36 => Some("Draconic Power"),
-        37 => Some("Earthen Heart"),
-        // Nightblade
-        38 => Some("Assassination"),
-        39 => Some("Shadow"),
-        40 => Some("Siphoning"),
-        // Sorcerer
-        41 => Some("Dark Magic"),
-        42 => Some("Daedric Summoning"),
-        43 => Some("Storm Calling"),
-        // Warden
-        127 => Some("Animal Companions"),
-        128 => Some("Green Balance"),
-        129 => Some("Winter's Embrace"),
-        // Necromancer
-        131 => Some("Grave Lord"),
-        132 => Some("Bone Tyrant"),
-        133 => Some("Living Death"),
-        // Arcanist
-        218 => Some("Herald of the Tome"),
-        219 => Some("Soldier of Apocrypha"),
-        220 => Some("Curative Runeforms"),
-        // Guild
-        44  => Some("Mages Guild"),
-        45  => Some("Fighters Guild"),
-        55  => Some("Undaunted"),
-        130 => Some("Psijic Order"),
-        117 => Some("Thieves Guild"),
-        118 => Some("Dark Brotherhood"),
-        // Alliance War
-        48 => Some("Assault"),
-        67 => Some("Support"),
-        71 => Some("Emperor"),
-        // Racial
-        52 => Some("Orc"),
-        56 => Some("High Elf"),
-        57 => Some("Wood Elf"),
-        58 => Some("Khajiit"),
-        59 => Some("Imperial"),
-        60 => Some("Breton"),
-        62 => Some("Redguard"),
-        63 => Some("Argonian"),
-        64 => Some("Dark Elf"),
-        65 => Some("Nord"),
-        // World
-        50 => Some("Werewolf"),
-        51 => Some("Vampire"),
-        72 => Some("Soul Magic"),
-        111 => Some("Legerdemain"),
-        155 => Some("Scrying"),
-        157 => Some("Excavation"),
-        // Crafting
-        76  => Some("Provisioning"),
-        77  => Some("Alchemy"),
-        78  => Some("Enchanting"),
-        79  => Some("Blacksmithing"),
-        80  => Some("Woodworking"),
-        81  => Some("Clothing"),
-        141 => Some("Jewellery"),
-        // Companion - Bastian
-        174 => Some("Companion Ardent Warrior"),
-        175 => Some("Companion Draconic Armor (Bastian)"),
-        176 => Some("Companion Radiating Heart (Bastian)"),
-        // Companion - Mirri
-        177 => Some("Companion Deadly Assassin"),
-        178 => Some("Companion Living Shade"),
-        179 => Some("Companion Soul Thief"),
-        // Companion - Weapons & Armor (shared)
-        180 => Some("Companion Two Handed"),
-        181 => Some("Companion One Hand and Shield"),
-        182 => Some("Companion Dual Wield"),
-        183 => Some("Companion Bow"),
-        184 => Some("Companion Destruction Staff"),
-        185 => Some("Companion Restoration Staff"),
-        186 => Some("Companion Light Armor"),
-        187 => Some("Companion Medium Armor"),
-        188 => Some("Companion Heavy Armor"),
-        // Companion - Guilds (shared)
-        189 => Some("Companion Fighters Guild"),
-        190 => Some("Companion Mages Guild"),
-        191 => Some("Companion Undaunted"),
-        // Companion - Racial (shared)
-        192 => Some("Companion Imperial"),
-        193 => Some("Companion Dark Elf"),
-        267 => Some("Companion High Elf"),
-        203 => Some("Companion Breton"),
-        199 => Some("Companion Khajiit (Ember)"),
-        249 => Some("Companion Redguard"),
-        250 => Some("Companion Argonian"),
-        263 => Some("Companion Khajiit (Zerith-var)"),
-        // Companion - Ember
-        196 => Some("Companion Lightning Caller"),
-        197 => Some("Companion Mischievous Caster"),
-        198 => Some("Companion Playful Schemer"),
-        // Companion - Isobel
-        200 => Some("Companion Blazing Might"),
-        201 => Some("Companion Brilliant Shield"),
-        202 => Some("Companion Healing Grace"),
-        // Companion - Sharp
-        241 => Some("Companion Beasts of the Hunt"),
-        242 => Some("Companion Winter's Bite"),
-        243 => Some("Companion Verdant Growth"),
-        // Companion - Azandar
-        246 => Some("Companion Scholar of Apocrypha"),
-        247 => Some("Companion Quill Knight"),
-        248 => Some("Companion Revitalizing Researcher"),
-        // Companion - Zerith-var
-        260 => Some("Companion Warrior's Banishment"),
-        261 => Some("Companion Remedy of Atonement"),
-        262 => Some("Companion Guardian's Commitment"),
-        // Companion - Tanlorin
-        264 => Some("Companion Radiating Heart (Tanlorin)"),
-        265 => Some("Companion Draconic Armor (Tanlorin)"),
-        266 => Some("Companion Empathic Fighter"),
-        // Vengeance
-        297 => Some("Vengeance Ardent Flame"),
-        298 => Some("Vengeance Draconic Power"),
-        299 => Some("Vengeance Earthen Heart"),
-        300 => Some("Vengeance Assassination"),
-        301 => Some("Vengeance Shadow"),
-        302 => Some("Vengeance Siphoning"),
-        303 => Some("Vengeance Aedric Spear"),
-        304 => Some("Vengeance Dawn's Wrath"),
-        305 => Some("Vengeance Restoring Light"),
-        306 => Some("Vengeance Daedric Summoning"),
-        307 => Some("Vengeance Dark Magic"),
-        308 => Some("Vengeance Storm Calling"),
-        309 => Some("Vengeance Animal Companions"),
-        310 => Some("Vengeance Green Balance"),
-        311 => Some("Vengeance Winter's Embrace"),
-        312 => Some("Vengeance Grave Lord"),
-        313 => Some("Vengeance Bone Tyrant"),
-        314 => Some("Vengeance Living Death"),
-        315 => Some("Vengeance Curative Runeforms"),
-        316 => Some("Vengeance Soldier of Apocrypha"),
-        317 => Some("Vengeance Herald of the Tome"),
-        319 => Some("Vengeance Two Handed"),
-        320 => Some("Vengeance One Hand and Shield"),
-        321 => Some("Vengeance Dual Wield"),
-        322 => Some("Vengeance Bow"),
-        323 => Some("Vengeance Destruction Staff"),
-        324 => Some("Vengeance Restoration Staff"),
-        325 => Some("Vengeance Assault"),
-        326 => Some("Vengeance Support"),
-        330 => Some("Vengeance Fighters Guild"),
-        331 => Some("Vengeance Mages Guild"),
-        332 => Some("Vengeance Undaunted"),
-        // Misc
-        334 => Some("Pre-U49 Draconic Power"),
-        _ => None,
-    }
-}
-
-pub fn match_mechanic(mech: &u8) -> Option<String> {
-    match mech {
-        0  => Some("None".to_string()),
-        1  => Some("Magicka".to_string()),
-        4  => Some("Stamina".to_string()),
-        5  => Some("Equal Magicka and Stamina".to_string()),
-        8  => Some("Ultimate".to_string()),
-        32 => Some("Health".to_string()),
-        33 => Some("Equal Health and Magicka".to_string()),
-        _  => None,
-    }
-}
-
-pub fn match_coefficient_type(coef: &u8) -> Option<String> {
-    match coef {
-        // 1 => Some("Unknown".to_string()),
-        // 2 => Some("Unknown".to_string()),
-        4 => Some("Maximum Magicka".to_string()),
-        7 => Some("Maximum Health".to_string()),
-        8 => Some("Health Recovery".to_string()),
-        13 => Some("Spell Resistance".to_string()),
-        22 => Some("Physical Resistance".to_string()),
-        25 => Some("Spell Damage".to_string()),
-        29 => Some("Maximum Stamina".to_string()),
-        35 => Some("Weapon Damage".to_string()),
-        // 36 => Some("Unknown".to_string()),
-        _ => None,
-    }
-}
-
 pub fn load_ability_names(path: &str) -> HashMap<u32, String> {
     std::fs::read_to_string(path)
         .unwrap_or_default()
@@ -976,172 +758,4 @@ pub fn load_tooltips(path: &str) -> HashMap<u32, String> {
             Some((id, tooltip.trim().to_string()))
         })
         .collect()
-}
-
-pub fn ability_type_name(id: &u8) -> Option<String> {
-    match id {
-        0 => Some("None".to_string()),
-        1 => Some("Damage".to_string()),
-        2 => Some("Heal".to_string()),
-        3 => Some("Resurrect".to_string()),
-        4 => Some("Blink".to_string()),
-        5 => Some("Bonus".to_string()),
-        6 => Some("Register trigger".to_string()),
-        7 => Some("Set target".to_string()),
-        8 => Some("Threat".to_string()),
-        9 => Some("Stun".to_string()),
-        10 => Some("Snare".to_string()),
-        11 => Some("Silence".to_string()),
-        12 => Some("Remove type".to_string()),
-        13 => Some("Set cooldown".to_string()),
-        14 => Some("Combat resource".to_string()),
-        15 => Some("Damage shield".to_string()),
-        16 => Some("Move position".to_string()),
-        17 => Some("Knockback".to_string()),
-        18 => Some("Charge".to_string()),
-        19 => Some("Immunity".to_string()),
-        20 => Some("Intercept".to_string()),
-        21 => Some("Reflection".to_string()),
-        22 => Some("Area effect".to_string()),
-        23 => Some("Deprecated 2".to_string()),
-        24 => Some("Create inventory item".to_string()),
-        25 => Some("Damage limit".to_string()),
-        26 => Some("Area teleport".to_string()),
-        27 => Some("Fear".to_string()),
-        28 => Some("Trauma".to_string()),
-        29 => Some("Stealth".to_string()),
-        30 => Some("See stealth".to_string()),
-        31 => Some("Flight".to_string()),
-        32 => Some("Disorient".to_string()),
-        33 => Some("Stagger".to_string()),
-        34 => Some("Slow fall".to_string()),
-        35 => Some("Jump".to_string()),
-        36 => Some("Siege cluster area effect".to_string()),
-        37 => Some("Summon".to_string()),
-        38 => Some("Mount".to_string()),
-        39 => Some("Interact refusal override".to_string()),
-        40 => Some("Deflect attack".to_string()),
-        41 => Some("Non-existent".to_string()),
-        42 => Some("No kill".to_string()),
-        43 => Some("No aggro".to_string()),
-        44 => Some("Dispel".to_string()),
-        45 => Some("Vampire".to_string()),
-        46 => Some("Create interactable".to_string()),
-        47 => Some("Modify cooldown".to_string()),
-        48 => Some("Levitate".to_string()),
-        49 => Some("Pacify".to_string()),
-        50 => Some("Action list".to_string()),
-        51 => Some("Interrupt".to_string()),
-        52 => Some("Block".to_string()),
-        53 => Some("Off balance".to_string()),
-        54 => Some("Exhausted".to_string()),
-        55 => Some("Modify duration".to_string()),
-        56 => Some("Dodge".to_string()),
-        57 => Some("Show non".to_string()),
-        58 => Some("Misdirect".to_string()),
-        59 => Some("Free cast".to_string()),
-        60 => Some("Siege create".to_string()),
-        61 => Some("Siege area effect".to_string()),
-        62 => Some("Defend".to_string()),
-        63 => Some("Free interact".to_string()),
-        64 => Some("Change appearance".to_string()),
-        65 => Some("Attacker reflect".to_string()),
-        66 => Some("Attacker intercept".to_string()),
-        67 => Some("Disarm".to_string()),
-        68 => Some("Parry".to_string()),
-        69 => Some("Path line".to_string()),
-        70 => Some("Double fire".to_string()),
-        71 => Some("Fire proc".to_string()),
-        72 => Some("Leap".to_string()),
-        73 => Some("Reveal".to_string()),
-        74 => Some("Siege pack up".to_string()),
-        75 => Some("Recall".to_string()),
-        76 => Some("Grant ability".to_string()),
-        77 => Some("Hide".to_string()),
-        78 => Some("Set hotbar".to_string()),
-        79 => Some("No lock pick".to_string()),
-        80 => Some("Fill soul gem".to_string()),
-        81 => Some("Soul gem resurrect".to_string()),
-        82 => Some("Despawn override".to_string()),
-        83 => Some("Update death dialog".to_string()),
-        84 => Some("Deprecated 4".to_string()),
-        85 => Some("Client FX".to_string()),
-        86 => Some("Avoid death".to_string()),
-        87 => Some("Non-combat bonus".to_string()),
-        88 => Some("No see target".to_string()),
-        89 => Some("Deprecated".to_string()),
-        90 => Some("Set personality".to_string()),
-        91 => Some("Basic".to_string()),
-        92 => Some("Rewind time".to_string()),
-        93 => Some("Light/Heavy attack override".to_string()),
-        94 => Some("Derived stat cache".to_string()),
-        95 => Some("AvA reach".to_string()),
-        96 => Some("Random branch".to_string()),
-        97 => Some("Mount block".to_string()),
-        98 => Some("Deprecated 3".to_string()),
-        99 => Some("Hard dismount".to_string()),
-        100 => Some("Link target".to_string()),
-        101 => Some("Custom target area".to_string()),
-        102 => Some("Damage transfer".to_string()),
-        103 => Some("Disable item sets".to_string()),
-        104 => Some("Follow waypoint path".to_string()),
-        105 => Some("Set aim at target".to_string()),
-        106 => Some("Face target".to_string()),
-        107 => Some("LOS move position".to_string()),
-        108 => Some("Disable client turning".to_string()),
-        109 => Some("Damage immune".to_string()),
-        110 => Some("Stop moving".to_string()),
-        111 => Some("Resource tap".to_string()),
-        112 => Some("Share ultimate".to_string()),
-        113 => Some("AvA object heal".to_string()),
-        114 => Some("Reduce healing from others".to_string()),
-        115 => Some("Reduce gravity".to_string()),
-        116 => Some("Night market unknown".to_string()),
-        117 => Some("Mandatory snare".to_string()),
-        _ => None,
-    }
-}
-
-pub fn tooltip_type(id: &u32) -> Option<String> {
-    match id {
-        3  => Some("ConditionalBuffActive".to_string()),          // with X active, e.g. ice avatar (IA/dungeon buff)
-        8  => Some("BuffGain".to_string()),                       // buff gain (links to named effect by id)
-        10 => Some("ActivationEffect".to_string()),               // activating X does ... (dread cellar side buffs)
-        16 => Some("ResourceGain".to_string()),                   // health / shield / stamina gain
-        17 => Some("MartialDamage".to_string()),                  // martial / melee damage
-        18 => Some("MagicalDamage".to_string()),                  // magical / ranged damage
-        19 => Some("TickRate".to_string()),                       // tick rate
-        20 => Some("Duration".to_string()),                       // duration (paired with 49, 53)
-        21 => Some("DeprecatedChampionPoints".to_string()),       // deprecated champion points
-        22 => Some("DeprecatedChampionPoints2".to_string()),      // deprecated champion points
-        31 => Some("IncreasedDurationVsMonsters".to_string()),    // increase duration against monsters
-        44 => Some("MinimumCooldown".to_string()),                // minimum time between occurrences
-        48 => Some("DeprecatedZeroDuration".to_string()),         // deprecated 0.0s (2 unused buffs)
-        49 => Some("SingleTargetDoT".to_string()),                // single-target damage over time
-        51 => Some("DeprecatedMultiHit".to_string()),             // multi-hit (no longer used)
-        52 => Some("SingleTargetHeal".to_string()),               // single-target heal
-        53 => Some("AreaHoT".to_string()),                        // area heal over time
-        55 => Some("Percentage".to_string()),                     // generic percentage value
-        56 => Some("IncreaseDurationOf".to_string()),             // increase duration of (another effect)
-        57 => Some("DeprecatedHalfSecondDuration".to_string()),   // deprecated 0.5s (3 unused buffs)
-        58 => Some("ReduceCostIncreaseRecovery".to_string()),     // reduce cost / increase recovery (mag/stam/etc.)
-        72 => Some("DeprecatedTriResourceGrant".to_string()),     // deprecated; grants health/stam/mag (id 68411)
-        73 => Some("DeprecatedArmourPercent".to_string()),        // deprecated; grants armour % (id 18690)
-        79 => Some("DeprecatedArmourMs".to_string()),             // deprecated; same as 73 but in milliseconds
-        90 => Some("SelfHeal".to_string()),                       // self heal
-        91 => Some("Knockback".to_string()),                      // knockback (suspected)
-        92 => Some("DeprecatedIncreasedChance".to_string()),      // deprecated; increase chance
-        93 => Some("DelayedStrike".to_string()),                  // delay until damage / called-down strike
-        96 => Some("StatPercentage".to_string()),                 // percentage of a stat (healing done, crit dmg, etc.)
-        97 => Some("ReduceHeatPercent".to_string()),              // reduce heat by a percentage
-        99 => Some("FlatConstant".to_string()),                   // flat constant - new with u49 (sets/skills)
-        100 => Some("PercentageConstant".to_string()),            // percentage constant - new with u49 (mythic/skills)
-        104 => Some("ThresholdBelowHealthPercent".to_string()),   // applies to enemies below X% health
-        105 => Some("BonusUpToPercent".to_string()),              // up to X% more
-        114 => Some("CompanionEffect".to_string()),               // your companion
-        121 => Some("BuffExplanationText".to_string()),           // buff/debuff explanation text (follows 8)
-        122 => Some("BuffExplanationText2".to_string()),          // additional buff/debuff explanation text
-        123 => Some("MajorMinorBuffGain".to_string()),            // major/minor buff gain
-        _   => None,
-    }
 }
