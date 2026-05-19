@@ -158,7 +158,7 @@ pub struct SkillData34 {
     #[serde(skip_serializing_if = "is_zero_u32")]               pub size2:          u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub causes_ids:     Vec<u32>,
     #[serde(serialize_with = "serialize_array")]                pub u2a:            [u8; U2ASIZE],
-    #[serde(serialize_with = "serialize_array")]                pub u2:             [u32; U2SIZE],
+    #[serde(serialize_with = "serialize_array")]                pub u2:             [u32; U2SIZE], // u2[3] = synergy?
     #[serde(skip_serializing_if = "is_zero_u32")]               pub size3:          u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list3:          Vec<u32>,
     #[serde(serialize_with = "serialize_array")]                pub u4:             [u16; U4SIZE],
@@ -169,8 +169,8 @@ pub struct SkillData34 {
     #[serde(serialize_with = "serialize_array")]                pub u6:             [u8; U6SIZE],
     #[serde(skip_serializing_if = "is_zero_u32")]               pub size6a:         u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list6a:         Vec<u32>,
-    #[serde(skip_serializing_if = "is_zero_u32")]               pub size6b:         u32,
-    #[serde(skip_serializing_if = "is_empty_vec")]              pub list6b:         Vec<u16>,
+    #[serde(skip_serializing_if = "is_zero_u32")]               pub size_tags:      u32,
+    #[serde(skip_serializing_if = "is_empty_vec")]              pub ability_tags:   Vec<u16>,
     pub coef:                                                                       SkillCoef,
     #[serde(skip_serializing_if = "is_zero_u16")]               pub size7:          u16,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list7:          Vec<u32>,
@@ -242,8 +242,8 @@ impl Default for SkillData34 {
             u6:             [0u8; U6SIZE],
             size6a:         0,
             list6a:         Vec::new(),
-            size6b:         0,
-            list6b:         Vec::new(),
+            size_tags:      0,
+            ability_tags:   Vec::new(),
             coef:           SkillCoef::default(),
             size7:          0,
             list7:          Vec::new(),
@@ -281,7 +281,6 @@ impl Default for SkillData34 {
 impl SkillData34 {
     pub fn from_bytes(bytes: &[u8]) -> io::Result<Self> {
         let mut r = ByteReader::new(std::io::Cursor::new(bytes));
-        // skill_index doesn't matter for a single-record parse; pass 0
         read_skill_record34_inner(&mut r, 0)
     }
 }
@@ -602,8 +601,8 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
         .map(|_| r.read_dword_be())
         .collect::<io::Result<_>>()?;
  
-    skill.size6b = r.read_dword_be()?;
-    skill.list6b = (0..skill.size6b)
+    skill.size_tags = r.read_dword_be()?;
+    skill.ability_tags = (0..skill.size_tags)
         .map(|_| r.read_word_be())
         .collect::<io::Result<_>>()?;
  
@@ -734,28 +733,4 @@ pub fn find_skill_data_filename(dir: &str) -> io::Result<String> {
     let msg = format!("Error: Failed to find any files matching '{dir}*{suffix}'!");
     eprintln!("{msg}");
     Err(io::Error::new(io::ErrorKind::NotFound, msg))
-}
-
-pub fn load_ability_names(path: &str) -> HashMap<u32, String> {
-    std::fs::read_to_string(path)
-        .unwrap_or_default()
-        .lines()
-        .filter_map(|line| {
-            let (id_str, name) = line.split_once(',')?;
-            let id: u32 = id_str.trim().parse().ok()?;
-            Some((id, name.trim().to_string()))
-        })
-        .collect()
-}
-
-pub fn load_tooltips(path: &str) -> HashMap<u32, String> {
-    std::fs::read_to_string(path)
-        .unwrap_or_default()
-        .lines()
-        .filter_map(|line| {
-            let (id_str, tooltip) = line.split_once(',')?;
-            let id: u32 = id_str.trim().parse().ok()?;
-            Some((id, tooltip.trim().to_string()))
-        })
-        .collect()
 }
