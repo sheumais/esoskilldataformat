@@ -702,6 +702,8 @@ pub enum MajorMinorBuff {
     MinorExpedition,
     MajorExpedition,
     Empower,
+    MinorCowardice,
+    MajorCowardice,
     MinorBreach,
     MajorBreach,
     MinorBerserk,
@@ -756,6 +758,8 @@ impl MajorMinorBuff {
             35 => Some(Self::MinorExpedition),
             36 => Some(Self::MajorExpedition),
             37 => Some(Self::Empower),
+            38 => Some(Self::MinorCowardice),
+            39 => Some(Self::MajorCowardice),
             40 => Some(Self::MinorBreach),
             41 => Some(Self::MajorBreach),
             42 => Some(Self::MinorBerserk),
@@ -811,6 +815,8 @@ impl MajorMinorBuff {
             Self::MinorExpedition   => "Minor Expedition",
             Self::MajorExpedition   => "Major Expedition",
             Self::Empower           => "Empower",
+            Self::MinorCowardice    => "Minor Cowardice",
+            Self::MajorCowardice    => "Major Cowardice",
             Self::MinorBreach       => "Minor Breach",
             Self::MajorBreach       => "Major Breach",
             Self::MinorBerserk      => "Minor Berserk",
@@ -865,6 +871,8 @@ impl MajorMinorBuff {
             Self::MinorExpedition   => 15,
             Self::MajorExpedition   => 30,
             Self::Empower           => 70,
+            Self::MinorCowardice    => 215,
+            Self::MajorCowardice    => 430,
             Self::MinorBreach       => 2974,
             Self::MajorBreach       => 5948,
             Self::MinorBerserk      => 5,
@@ -1069,6 +1077,15 @@ pub enum SkillLine {
 
     // Misc
     PreU49DraconicPower,
+
+    // Class Mastery Passives
+    ClassMasteryDragonknight,
+    ClassMasteryArcanist,
+    ClassMasteryNecromancer,
+    ClassMasteryWarden,
+    ClassMasteryTemplar,
+    ClassMasteryNightblade,
+    ClassMasterySorcerer,
 }
 
 impl SkillLine {
@@ -1217,6 +1234,13 @@ impl SkillLine {
             340 => Some(Self::VengeanceVanguard),
             341 => Some(Self::VengeanceBattleMedic),
             342 => Some(Self::VengeanceScout),
+            351 => Some(Self::ClassMasteryDragonknight),
+            352 => Some(Self::ClassMasteryArcanist),
+            353 => Some(Self::ClassMasteryNecromancer),
+            354 => Some(Self::ClassMasteryWarden),
+            355 => Some(Self::ClassMasteryTemplar),
+            356 => Some(Self::ClassMasteryNightblade),
+            357 => Some(Self::ClassMasterySorcerer),
             _   => None,
         }
     }
@@ -1366,11 +1390,26 @@ impl SkillLine {
             Self::VengeanceBattleMedic           => "Vengeance Battle Medic",
             Self::VengeanceScout                 => "Vengeance Scout",
             Self::PreU49DraconicPower            => "Pre-U49 Draconic Power",
+            Self::ClassMasteryDragonknight       => "Dragonknight Class Mastery",
+            Self::ClassMasteryArcanist           => "Arcanist Class Mastery",
+            Self::ClassMasteryNecromancer        => "Necromancer Class Mastery",
+            Self::ClassMasteryWarden             => "Warden Class Mastery",
+            Self::ClassMasteryTemplar            => "Templar Class Mastery",
+            Self::ClassMasteryNightblade         => "Nightblade Class Mastery",
+            Self::ClassMasterySorcerer           => "Sorcerer Class Mastery",
         }
     }
 
     pub fn is_vengeance(&self) -> bool {
         matches!(self, Self::VengeanceArdentFlame | Self::VengeanceDraconicPower | Self::VengeanceEarthenHeart | Self::VengeanceAssassination | Self::VengeanceShadow | Self::VengeanceSiphoning | Self::VengeanceAedricSpear | Self::VengeanceDawnsWrath | Self::VengeanceRestoringLight | Self::VengeanceDaedricSummoning | Self::VengeanceDarkMagic | Self::VengeanceStormCalling | Self::VengeanceAnimalCompanions | Self::VengeanceGreenBalance | Self::VengeanceWintersEmbrace | Self::VengeanceGraveLord | Self::VengeanceBoneTyrant | Self::VengeanceLivingDeath | Self::VengeanceCurativeRuneforms | Self::VengeanceSoldierOfApocrypha | Self::VengeanceHeraldOfTheTome | Self::VengeanceTwoHanded | Self::VengeanceOneHandAndShield | Self::VengeanceDualWield | Self::VengeanceBow | Self::VengeanceDestructionStaff | Self::VengeanceRestorationStaff | Self::VengeanceAssault | Self::VengeanceSupport | Self::VengeanceFightersGuild | Self::VengeanceMagesGuild | Self::VengeanceUndaunted | Self::VengeanceSoldier | Self::VengeanceVanguard | Self::VengeanceBattleMedic | Self::VengeanceScout)
+    }
+
+    pub fn is_companion(&self) -> bool {
+        matches!(self, Self::CompanionArdentWarrior | Self::CompanionDraconicArmorBastian | Self::CompanionRadiatingHeartBastian |Self::CompanionDeadlyAssassin | Self::CompanionLivingShade | Self::CompanionSoulThief |Self::CompanionTwoHanded | Self::CompanionOneHandAndShield | Self::CompanionDualWield | Self::CompanionBow | Self::CompanionDestructionStaff | Self::CompanionRestorationStaff | Self::CompanionLightArmor | Self::CompanionMediumArmor | Self::CompanionHeavyArmor |Self::CompanionFightersGuild | Self::CompanionMagesGuild | Self::CompanionUndaunted |Self::CompanionImperial | Self::CompanionDarkElf | Self::CompanionHighElf | Self::CompanionBreton | Self::CompanionKhajiitEmber | Self::CompanionRedguard | Self::CompanionArgonian | Self::CompanionKhajiitZerithVar |Self::CompanionLightningCaller | Self::CompanionMischievousCaster | Self::CompanionPlayfulSchemer |Self::CompanionBlazingMight | Self::CompanionBrilliantShield | Self::CompanionHealingGrace |Self::CompanionBeastsOfTheHunt | Self::CompanionWintersBite | Self::CompanionVerdantGrowth |Self::CompanionScholarOfApocrypha | Self::CompanionQuillKnight | Self::CompanionRevitalizingResearcher |Self::CompanionWarriorsBanishment | Self::CompanionRemedyOfAtonement | Self::CompanionGuardiansCommitment |Self::CompanionRadiatingHeartTanlorin | Self::CompanionDraconicArmorTanlorin | Self::CompanionEmpathicFighter)
+    }
+
+    pub fn is_class_mastery(&self) -> bool {
+        matches!(self, Self::ClassMasteryDragonknight | Self::ClassMasteryArcanist | Self::ClassMasteryNecromancer | Self::ClassMasteryWarden | Self::ClassMasteryTemplar | Self::ClassMasteryNightblade | Self::ClassMasterySorcerer)
     }
 }
 

@@ -771,24 +771,3 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
     r.seek(skill.end_offset)?;
     Ok(skill)
 }
-
-pub fn find_skill_data_filename(dir: &str) -> io::Result<String> {
-    let suffix = "_Uncompressed.EsoFileData";
-    let entries = std::fs::read_dir(dir).map_err(|e| {
-        let msg = format!("Error: Failed to find any files matching '{dir}*{suffix}': {e}");
-        eprintln!("{msg}");
-        io::Error::new(io::ErrorKind::NotFound, msg)
-    })?;
-
-    for entry in entries.flatten() {
-        let file_name = entry.file_name();
-        let name = file_name.to_string_lossy();
-        if name.ends_with(suffix) {
-            return Ok(format!("{dir}{name}"));
-        }
-    }
-
-    let msg = format!("Error: Failed to find any files matching '{dir}*{suffix}'!");
-    eprintln!("{msg}");
-    Err(io::Error::new(io::ErrorKind::NotFound, msg))
-}
