@@ -680,6 +680,7 @@ pub enum MajorMinorBuff {
     MinorResolve,
     MajorResolve,
     MinorBrittle,
+    MajorBrittle,
     MinorFortitude,
     MajorEndurance,
     MinorEndurance,
@@ -733,6 +734,7 @@ impl MajorMinorBuff {
             9  => Some(Self::MinorResolve),
             10 => Some(Self::MajorResolve),
             11 => Some(Self::MinorBrittle),
+            12 => Some(Self::MajorBrittle),
             13 => Some(Self::MinorFortitude),
             14 => Some(Self::MajorEndurance),
             15 => Some(Self::MinorEndurance),
@@ -787,6 +789,7 @@ impl MajorMinorBuff {
             Self::MinorResolve      => "Minor Resolve",
             Self::MajorResolve      => "Major Resolve",
             Self::MinorBrittle      => "Minor Brittle",
+            Self::MajorBrittle      => "Major Brittle",
             Self::MinorFortitude    => "Minor Fortitude",
             Self::MajorEndurance    => "Major Endurance",
             Self::MinorEndurance    => "Minor Endurance",
@@ -840,6 +843,7 @@ impl MajorMinorBuff {
             Self::MinorResolve      => 2974,
             Self::MajorResolve      => 5948,
             Self::MinorBrittle      => 10,
+            Self::MajorBrittle      => 20,
             Self::MinorFortitude    => 15,
             Self::MajorEndurance    => 30,
             Self::MinorEndurance    => 15,
@@ -1057,6 +1061,11 @@ pub enum SkillLine {
     VengeanceFightersGuild,
     VengeanceMagesGuild,
     VengeanceUndaunted,
+    // U50 Vengeance
+    VengeanceSoldier,
+    VengeanceVanguard,
+    VengeanceBattleMedic,
+    VengeanceScout,
 
     // Misc
     PreU49DraconicPower,
@@ -1204,6 +1213,10 @@ impl SkillLine {
             331 => Some(Self::VengeanceMagesGuild),
             332 => Some(Self::VengeanceUndaunted),
             334 => Some(Self::PreU49DraconicPower),
+            339 => Some(Self::VengeanceSoldier),
+            340 => Some(Self::VengeanceVanguard),
+            341 => Some(Self::VengeanceBattleMedic),
+            342 => Some(Self::VengeanceScout),
             _   => None,
         }
     }
@@ -1348,12 +1361,16 @@ impl SkillLine {
             Self::VengeanceFightersGuild         => "Vengeance Fighters Guild",
             Self::VengeanceMagesGuild            => "Vengeance Mages Guild",
             Self::VengeanceUndaunted             => "Vengeance Undaunted",
+            Self::VengeanceSoldier               => "Vengeance Soldier",
+            Self::VengeanceVanguard              => "Vengeance Vanguard",
+            Self::VengeanceBattleMedic           => "Vengeance Battle Medic",
+            Self::VengeanceScout                 => "Vengeance Scout",
             Self::PreU49DraconicPower            => "Pre-U49 Draconic Power",
         }
     }
 
     pub fn is_vengeance(&self) -> bool {
-        matches!(self, Self::VengeanceArdentFlame | Self::VengeanceDraconicPower | Self::VengeanceEarthenHeart | Self::VengeanceAssassination | Self::VengeanceShadow | Self::VengeanceSiphoning | Self::VengeanceAedricSpear | Self::VengeanceDawnsWrath | Self::VengeanceRestoringLight | Self::VengeanceDaedricSummoning | Self::VengeanceDarkMagic | Self::VengeanceStormCalling | Self::VengeanceAnimalCompanions | Self::VengeanceGreenBalance | Self::VengeanceWintersEmbrace | Self::VengeanceGraveLord | Self::VengeanceBoneTyrant | Self::VengeanceLivingDeath | Self::VengeanceCurativeRuneforms | Self::VengeanceSoldierOfApocrypha | Self::VengeanceHeraldOfTheTome | Self::VengeanceTwoHanded | Self::VengeanceOneHandAndShield | Self::VengeanceDualWield | Self::VengeanceBow | Self::VengeanceDestructionStaff | Self::VengeanceRestorationStaff | Self::VengeanceAssault | Self::VengeanceSupport | Self::VengeanceFightersGuild | Self::VengeanceMagesGuild | Self::VengeanceUndaunted) 
+        matches!(self, Self::VengeanceArdentFlame | Self::VengeanceDraconicPower | Self::VengeanceEarthenHeart | Self::VengeanceAssassination | Self::VengeanceShadow | Self::VengeanceSiphoning | Self::VengeanceAedricSpear | Self::VengeanceDawnsWrath | Self::VengeanceRestoringLight | Self::VengeanceDaedricSummoning | Self::VengeanceDarkMagic | Self::VengeanceStormCalling | Self::VengeanceAnimalCompanions | Self::VengeanceGreenBalance | Self::VengeanceWintersEmbrace | Self::VengeanceGraveLord | Self::VengeanceBoneTyrant | Self::VengeanceLivingDeath | Self::VengeanceCurativeRuneforms | Self::VengeanceSoldierOfApocrypha | Self::VengeanceHeraldOfTheTome | Self::VengeanceTwoHanded | Self::VengeanceOneHandAndShield | Self::VengeanceDualWield | Self::VengeanceBow | Self::VengeanceDestructionStaff | Self::VengeanceRestorationStaff | Self::VengeanceAssault | Self::VengeanceSupport | Self::VengeanceFightersGuild | Self::VengeanceMagesGuild | Self::VengeanceUndaunted | Self::VengeanceSoldier | Self::VengeanceVanguard | Self::VengeanceBattleMedic | Self::VengeanceScout)
     }
 }
 
