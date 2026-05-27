@@ -5,7 +5,7 @@ use serde::Serialize;
 use serde::ser::SerializeSeq;
 use serde::Serializer;
 
-pub mod data_enum;
+pub mod enums;
 
 pub fn serialize_array<S, T, const N: usize>(arr: &[T; N], s: S) -> Result<S::Ok, S::Error>
 where
@@ -181,7 +181,7 @@ pub struct SkillData34 {
     #[serde(serialize_with = "serialize_array")]                pub u6:             [u8; U6SIZE],
     #[serde(skip_serializing_if = "is_zero_u32")]               pub size6a:         u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list6a:         Vec<u32>,
-    #[serde(skip_serializing_if = "is_zero_u32")]               pub size6b:         u32,
+    #[serde(skip_serializing_if = "is_zero_u32")]               pub size_tags:      u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub ability_tags:   Vec<u16>,
     pub pre:                                                                        PreSkillCoef,
     pub post:                                                                       PostSkillCoef,
@@ -259,7 +259,7 @@ impl Default for SkillData34 {
             u6:             [0u8; U6SIZE],
             size6a:         0,
             list6a:         Vec::new(),
-            size6b:         0,
+            size_tags:      0,
             ability_tags:   Vec::new(),
             pre:            PreSkillCoef::default(),
             post:           PostSkillCoef::default(),
@@ -630,8 +630,8 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
         .map(|_| r.read_dword_be())
         .collect::<io::Result<_>>()?;
 
-    skill.size6b       = r.read_dword_be()?;
-    skill.ability_tags = (0..skill.size6b)
+    skill.size_tags = r.read_dword_be()?;
+    skill.ability_tags = (0..skill.size_tags)
         .map(|_| r.read_word_be())
         .collect::<io::Result<_>>()?;
 
