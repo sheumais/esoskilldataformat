@@ -84,14 +84,14 @@ pub struct PreSkillCoef {
 
 #[derive(Debug, Default, Serialize, PartialEq, Clone)]
 pub struct PostSkillCoef {
-    #[serde(skip_serializing_if = "is_zero_u16")] pub u_eight:  u16,
-    #[serde(skip_serializing_if = "is_zero_u8")]  pub u_eight2: u8,
-    #[serde(skip_serializing_if = "is_zero_u32")] pub u9:       u32,
-    #[serde(skip_serializing_if = "is_zero_u8")]  pub u10:      u8,
-    #[serde(skip_serializing_if = "is_zero_u32")] pub u11:      u32,
-    #[serde(skip_serializing_if = "is_zero_u8")]  pub u12:      u8,
-    #[serde(skip_serializing_if = "is_zero_u32")] pub u13:      u32,
-    #[serde(skip_serializing_if = "is_zero_u16")] pub u14:      u16,
+    #[serde(skip_serializing_if = "is_zero_u16")] pub u1: u16,
+    #[serde(skip_serializing_if = "is_zero_u8")]  pub u2: u8,
+    #[serde(skip_serializing_if = "is_zero_u32")] pub u3: u32,
+    #[serde(skip_serializing_if = "is_zero_u8")]  pub u4: u8,
+    #[serde(skip_serializing_if = "is_zero_u32")] pub u5: u32,
+    #[serde(skip_serializing_if = "is_zero_u8")]  pub u6: u8,
+    #[serde(skip_serializing_if = "is_zero_u32")] pub u7: u32,
+    #[serde(skip_serializing_if = "is_zero_u16")] pub u8: u16,
 }
 
 #[derive(Debug, Default, Serialize, PartialEq, Clone)]
@@ -649,14 +649,14 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
 
     {
         let p = &mut skill.post;
-        p.u_eight  = r.read_word_be()?;
-        p.u_eight2 = r.read_byte()?;
-        p.u9       = r.read_dword_be()?;
-        p.u10      = r.read_byte()?;
-        p.u11      = r.read_dword_be()?;
-        p.u12      = r.read_byte()?;
-        p.u13      = r.read_dword_be()?;
-        p.u14      = r.read_word_be()?;
+        p.u1  = r.read_word_be()?;
+        p.u2 = r.read_byte()?;
+        p.u3       = r.read_dword_be()?;
+        p.u4      = r.read_byte()?;
+        p.u5      = r.read_dword_be()?;
+        p.u6      = r.read_byte()?;
+        p.u7      = r.read_dword_be()?;
+        p.u8      = r.read_word_be()?;
     }
 
     skill.size7 = r.read_word_be()?;
