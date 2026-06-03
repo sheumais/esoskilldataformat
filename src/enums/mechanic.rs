@@ -21,7 +21,7 @@ impl Mechanic {
             8  => Some(Self::Ultimate),
             32 => Some(Self::Health),
             33 => Some(Self::EqualHealthAndMagicka),
-            _  => None,
+            _  => panic!("Unknown Mechanic: {}", id),
         }
     }
 

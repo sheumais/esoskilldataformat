@@ -47,7 +47,7 @@ pub fn always_skip_serialization<T>(_v: &T) -> bool { true }
 pub struct SkillBaseData {
     #[serde(skip_serializing_if = "is_zero_u32")] pub date_time:          u32,
     #[serde(skip_serializing_if = "is_zero_u32")] pub caused_by:          u32,
-    #[serde(skip_serializing_if = "is_zero_u32")] pub z2:                 u32,
+    #[serde(skip_serializing_if = "is_zero_u32")] pub scribing_index:     u32,
     #[serde(skip_serializing_if = "is_zero_u32")] pub player_skill_index: u32,
     #[serde(skip_serializing_if = "is_zero_u32")] pub skill_line_id:      u32,
     #[serde(skip_serializing_if = "is_zero_u32")] pub cast_time:          u32,
@@ -552,7 +552,7 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
         let bd = &mut skill.base_data;
         bd.date_time          = r.read_dword_be()?;
         bd.caused_by          = r.read_dword_be()?;
-        bd.z2                 = r.read_dword_be()?;
+        bd.scribing_index     = r.read_dword_be()?;
         bd.player_skill_index = r.read_dword_be()?;
         bd.skill_line_id      = r.read_dword_be()?;
         bd.cast_time          = r.read_dword_be()?;

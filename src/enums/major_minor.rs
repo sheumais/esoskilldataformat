@@ -1,233 +1,111 @@
 use std::fmt;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum MajorMinorBuff {
-    MinorBrutality,
-    MajorBrutality,
-    MinorSavagery,
-    MajorSavagery,
-    MinorSorcery,
-    MajorSorcery,
-    MinorProphecy,
-    MajorProphecy,
-    MinorResolve,
-    MajorResolve,
-    MinorBrittle,
-    MajorBrittle,
-    MinorFortitude,
-    MajorEndurance,
-    MinorEndurance,
-    MajorFortitude,
-    MinorHeroism,
-    MajorHeroism,
-    MinorMending,
-    MajorMending,
-    MinorVitality,
-    MajorVitality,
-    MinorEvasion,
-    MajorEvasion,
-    MinorProtection,
-    MajorProtection,
-    MinorMaim,
-    MajorMaim,
-    MinorDefile,
-    MajorDefile,
-    MinorExpedition,
-    MajorExpedition,
-    Empower,
-    MinorCowardice,
-    MajorCowardice,
-    MinorBreach,
-    MajorBreach,
-    MinorBerserk,
-    MajorBerserk,
-    MinorForce,
-    MajorForce,
-    MajorCourage,
-    MinorCourage,
-    MinorToughness,
-    Gallop,
-    MinorEnervation,
-    MinorUncertainty,
-    MinorLifesteal,
-    MinorMagickasteal,
-    MinorVulnerability,
-    MajorVulnerability,
+macro_rules! major_minor_buffs {
+    (
+        $(
+            $variant:ident = $id:expr => $name:expr => $tooltip:expr
+        ),* $(,)?
+    ) => {
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+        pub enum MajorMinorBuff {
+            $(
+                $variant,
+            )*
+        }
+
+        impl MajorMinorBuff {
+            pub fn from_id(id: &u32) -> Option<Self> {
+                match id {
+                    $(
+                        $id => Some(Self::$variant),
+                    )*
+                    _ => None,
+                }
+            }
+
+            pub fn to_id(&self) -> u32 {
+                match self {
+                    $(
+                        Self::$variant => $id,
+                    )*
+                }
+            }
+
+            pub fn as_str(&self) -> &'static str {
+                match self {
+                    $(
+                        Self::$variant => $name,
+                    )*
+                }
+            }
+
+            pub fn tooltip_value(&self) -> u32 {
+                match self {
+                    $(
+                        Self::$variant => $tooltip,
+                    )*
+                }
+            }
+        }
+
+        impl fmt::Display for MajorMinorBuff {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                f.write_str(self.as_str())
+            }
+        }
+    };
 }
 
-impl MajorMinorBuff {
-    pub fn from_id(id: &u32) -> Option<Self> {
-        match id {
-            1  => Some(Self::MinorBrutality),
-            2  => Some(Self::MajorBrutality),
-            3  => Some(Self::MinorSavagery),
-            4  => Some(Self::MajorSavagery),
-            5  => Some(Self::MinorSorcery),
-            6  => Some(Self::MajorSorcery),
-            7  => Some(Self::MinorProphecy),
-            8  => Some(Self::MajorProphecy),
-            9  => Some(Self::MinorResolve),
-            10 => Some(Self::MajorResolve),
-            11 => Some(Self::MinorBrittle),
-            12 => Some(Self::MajorBrittle),
-            13 => Some(Self::MinorFortitude),
-            14 => Some(Self::MajorEndurance),
-            15 => Some(Self::MinorEndurance),
-            16 => Some(Self::MajorFortitude),
-            19 => Some(Self::MinorHeroism),
-            20 => Some(Self::MajorHeroism),
-            21 => Some(Self::MinorMending),
-            22 => Some(Self::MajorMending),
-            23 => Some(Self::MinorVitality),
-            24 => Some(Self::MajorVitality),
-            25 => Some(Self::MinorEvasion),
-            26 => Some(Self::MajorEvasion),
-            27 => Some(Self::MinorProtection),
-            28 => Some(Self::MajorProtection),
-            29 => Some(Self::MinorMaim),
-            30 => Some(Self::MajorMaim),
-            31 => Some(Self::MinorDefile),
-            32 => Some(Self::MajorDefile),
-            35 => Some(Self::MinorExpedition),
-            36 => Some(Self::MajorExpedition),
-            37 => Some(Self::Empower),
-            38 => Some(Self::MinorCowardice),
-            39 => Some(Self::MajorCowardice),
-            40 => Some(Self::MinorBreach),
-            41 => Some(Self::MajorBreach),
-            42 => Some(Self::MinorBerserk),
-            43 => Some(Self::MajorBerserk),
-            44 => Some(Self::MinorForce),
-            45 => Some(Self::MajorForce),
-            46 => Some(Self::MajorCourage),
-            48 => Some(Self::MinorCourage),
-            50 => Some(Self::MinorToughness),
-            54 => Some(Self::Gallop),
-            55 => Some(Self::MinorEnervation),
-            56 => Some(Self::MinorUncertainty),
-            57 => Some(Self::MinorLifesteal),
-            58 => Some(Self::MinorMagickasteal),
-            60 => Some(Self::MinorVulnerability),
-            61 => Some(Self::MajorVulnerability),
-            _  => None,
-        }
-    }
-
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Self::MinorBrutality    => "Minor Brutality",
-            Self::MajorBrutality    => "Major Brutality",
-            Self::MinorSavagery     => "Minor Savagery",
-            Self::MajorSavagery     => "Major Savagery",
-            Self::MinorSorcery      => "Minor Sorcery",
-            Self::MajorSorcery      => "Major Sorcery",
-            Self::MinorProphecy     => "Minor Prophecy",
-            Self::MajorProphecy     => "Major Prophecy",
-            Self::MinorResolve      => "Minor Resolve",
-            Self::MajorResolve      => "Major Resolve",
-            Self::MinorBrittle      => "Minor Brittle",
-            Self::MajorBrittle      => "Major Brittle",
-            Self::MinorFortitude    => "Minor Fortitude",
-            Self::MajorEndurance    => "Major Endurance",
-            Self::MinorEndurance    => "Minor Endurance",
-            Self::MajorFortitude    => "Major Fortitude",
-            Self::MinorHeroism      => "Minor Heroism",
-            Self::MajorHeroism      => "Major Heroism",
-            Self::MinorMending      => "Minor Mending",
-            Self::MajorMending      => "Major Mending",
-            Self::MinorVitality     => "Minor Vitality",
-            Self::MajorVitality     => "Major Vitality",
-            Self::MinorEvasion      => "Minor Evasion",
-            Self::MajorEvasion      => "Major Evasion",
-            Self::MinorProtection   => "Minor Protection",
-            Self::MajorProtection   => "Major Protection",
-            Self::MinorMaim         => "Minor Maim",
-            Self::MajorMaim         => "Major Maim",
-            Self::MinorDefile       => "Minor Defile",
-            Self::MajorDefile       => "Major Defile",
-            Self::MinorExpedition   => "Minor Expedition",
-            Self::MajorExpedition   => "Major Expedition",
-            Self::Empower           => "Empower",
-            Self::MinorCowardice    => "Minor Cowardice",
-            Self::MajorCowardice    => "Major Cowardice",
-            Self::MinorBreach       => "Minor Breach",
-            Self::MajorBreach       => "Major Breach",
-            Self::MinorBerserk      => "Minor Berserk",
-            Self::MajorBerserk      => "Major Berserk",
-            Self::MinorForce        => "Minor Force",
-            Self::MajorForce        => "Major Force",
-            Self::MajorCourage      => "Major Courage",
-            Self::MinorCourage      => "Minor Courage",
-            Self::MinorToughness    => "Minor Toughness",
-            Self::Gallop            => "Gallop",
-            Self::MinorEnervation   => "Minor Enervation",
-            Self::MinorUncertainty  => "Minor Uncertainty",
-            Self::MinorLifesteal    => "Minor Lifesteal",
-            Self::MinorMagickasteal => "Minor Magickasteal",
-            Self::MinorVulnerability => "Minor Vulnerability",
-            Self::MajorVulnerability => "Major Vulnerability",
-        }
-    }
-
-    pub fn tooltip_value(&self) -> u32 {
-        match self {
-            Self::MinorBrutality    => 10,
-            Self::MajorBrutality    => 20,
-            Self::MinorSavagery     => 1314,
-            Self::MajorSavagery     => 2629,
-            Self::MinorSorcery      => 10,
-            Self::MajorSorcery      => 20,
-            Self::MinorProphecy     => 1314,
-            Self::MajorProphecy     => 2629,
-            Self::MinorResolve      => 2974,
-            Self::MajorResolve      => 5948,
-            Self::MinorBrittle      => 10,
-            Self::MajorBrittle      => 20,
-            Self::MinorFortitude    => 15,
-            Self::MajorEndurance    => 30,
-            Self::MinorEndurance    => 15,
-            Self::MajorFortitude    => 30,
-            Self::MinorHeroism      => 1,
-            Self::MajorHeroism      => 3,
-            Self::MinorMending      => 8,
-            Self::MajorMending      => 16,
-            Self::MinorVitality     => 6,
-            Self::MajorVitality     => 12,
-            Self::MinorEvasion      => 10,
-            Self::MajorEvasion      => 20,
-            Self::MinorProtection   => 5,
-            Self::MajorProtection   => 10,
-            Self::MinorMaim         => 5,
-            Self::MajorMaim         => 10,
-            Self::MinorDefile       => 6,
-            Self::MajorDefile       => 12,
-            Self::MinorExpedition   => 15,
-            Self::MajorExpedition   => 30,
-            Self::Empower           => 70,
-            Self::MinorCowardice    => 215,
-            Self::MajorCowardice    => 430,
-            Self::MinorBreach       => 2974,
-            Self::MajorBreach       => 5948,
-            Self::MinorBerserk      => 5,
-            Self::MajorBerserk      => 10,
-            Self::MinorForce        => 10,
-            Self::MajorForce        => 20,
-            Self::MajorCourage      => 215,
-            Self::MinorCourage      => 430,
-            Self::MinorToughness    => 10,
-            Self::Gallop            => 15,
-            Self::MinorEnervation   => 10,
-            Self::MinorUncertainty  => 1314,
-            Self::MinorLifesteal    => 600,
-            Self::MinorMagickasteal => 168,
-            Self::MinorVulnerability => 5,
-            Self::MajorVulnerability => 10,
-        }
-    }
-}
-
-impl fmt::Display for MajorMinorBuff {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(self.as_str())
-    }
+major_minor_buffs! {
+    MinorBrutality      = 1  => "Minor Brutality"       => 10,
+    MajorBrutality      = 2  => "Major Brutality"       => 20,
+    MinorSavagery       = 3  => "Minor Savagery"        => 1314,
+    MajorSavagery       = 4  => "Major Savagery"        => 2629,
+    MinorSorcery        = 5  => "Minor Sorcery"         => 10,
+    MajorSorcery        = 6  => "Major Sorcery"         => 20,
+    MinorProphecy       = 7  => "Minor Prophecy"        => 1314,
+    MajorProphecy       = 8  => "Major Prophecy"        => 2629,
+    MinorResolve        = 9  => "Minor Resolve"         => 2974,
+    MajorResolve        = 10 => "Major Resolve"         => 5948,
+    MinorBrittle        = 11 => "Minor Brittle"         => 10,
+    MajorBrittle        = 12 => "Major Brittle"         => 20,
+    MinorFortitude      = 13 => "Minor Fortitude"       => 15,
+    MajorEndurance      = 14 => "Major Endurance"       => 30,
+    MinorEndurance      = 15 => "Minor Endurance"       => 15,
+    MajorFortitude      = 16 => "Major Fortitude"       => 30,
+    MinorHeroism        = 19 => "Minor Heroism"         => 1,
+    MajorHeroism        = 20 => "Major Heroism"         => 3,
+    MinorMending        = 21 => "Minor Mending"         => 8,
+    MajorMending        = 22 => "Major Mending"         => 16,
+    MinorVitality       = 23 => "Minor Vitality"        => 6,
+    MajorVitality       = 24 => "Major Vitality"        => 12,
+    MinorEvasion        = 25 => "Minor Evasion"         => 10,
+    MajorEvasion        = 26 => "Major Evasion"         => 20,
+    MinorProtection     = 27 => "Minor Protection"      => 5,
+    MajorProtection     = 28 => "Major Protection"      => 10,
+    MinorMaim           = 29 => "Minor Maim"            => 5,
+    MajorMaim           = 30 => "Major Maim"            => 10,
+    MinorDefile         = 31 => "Minor Defile"          => 6,
+    MajorDefile         = 32 => "Major Defile"          => 12,
+    MinorExpedition     = 35 => "Minor Expedition"      => 15,
+    MajorExpedition     = 36 => "Major Expedition"      => 30,
+    Empower             = 37 => "Empower"               => 70,
+    MinorCowardice      = 38 => "Minor Cowardice"       => 215,
+    MajorCowardice      = 39 => "Major Cowardice"       => 430,
+    MinorBreach         = 40 => "Minor Breach"          => 2974,
+    MajorBreach         = 41 => "Major Breach"          => 5948,
+    MinorBerserk        = 42 => "Minor Berserk"         => 5,
+    MajorBerserk        = 43 => "Major Berserk"         => 10,
+    MinorForce          = 44 => "Minor Force"           => 10,
+    MajorForce          = 45 => "Major Force"           => 20,
+    MajorCourage        = 46 => "Major Courage"         => 215,
+    MinorCourage        = 48 => "Minor Courage"         => 430,
+    MinorToughness      = 50 => "Minor Toughness"       => 10,
+    Gallop              = 54 => "Gallop"                => 15,
+    MinorEnervation     = 55 => "Minor Enervation"      => 10,
+    MinorUncertainty    = 56 => "Minor Uncertainty"     => 1314,
+    MinorLifesteal      = 57 => "Minor Lifesteal"       => 600,
+    MinorMagickasteal   = 58 => "Minor Magickasteal"    => 168,
+    MinorVulnerability  = 60 => "Minor Vulnerability"   => 5,
+    MajorVulnerability  = 61 => "Major Vulnerability"   => 10,
 }
