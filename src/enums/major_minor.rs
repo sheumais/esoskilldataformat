@@ -23,6 +23,15 @@ macro_rules! major_minor_buffs {
                 }
             }
 
+            pub fn from_str(s: &str) -> Option<Self> {
+                match s {
+                    $(
+                        $name => Some(Self::$variant),
+                    )*
+                    _ => None,
+                }
+            }
+
             pub fn to_id(&self) -> u32 {
                 match self {
                     $(
