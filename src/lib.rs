@@ -66,7 +66,7 @@ pub struct SkillBaseData {
     #[serde(skip_serializing_if = "is_zero_u16")] pub start_tick:         u16,
     #[serde(skip_serializing_if = "is_zero_u16")] pub cost:               u16,
     #[serde(skip_serializing_if = "is_zero_u32")] pub radius:             u32,
-    #[serde(skip_serializing_if = "is_zero_u32")] pub z8:                 u32,
+    #[serde(skip_serializing_if = "is_zero_f32")] pub angle:              f32,
     #[serde(skip_serializing_if = "is_zero_u16")] pub u4:                 u16,
     #[serde(skip_serializing_if = "is_zero_u32")] pub u5:                 u32,
     #[serde(skip_serializing_if = "is_zero_u8")]  pub u6:                 u8,
@@ -198,7 +198,7 @@ pub struct SkillData34 {
     #[serde(skip_serializing_if = "is_zero_u32")]               pub size11:         u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list11:         Vec<List11Data>,
     #[serde(serialize_with = "serialize_array")]                pub u11:            [u8; U11SIZE],
-    pub u12:                                                                        [u8; U12SIZE],
+    #[serde(serialize_with = "serialize_array")]                pub u12:            [u8; U12SIZE],
     #[serde(skip_serializing_if = "is_zero_u32")]               pub size13:         u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list13:         Vec<u8>,
     #[serde(serialize_with = "serialize_array")]                pub u13:            [u32; U13SIZE],
@@ -571,7 +571,7 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
         bd.start_tick         = r.read_word_be()?;
         bd.cost               = r.read_word_be()?;
         bd.radius             = r.read_dword_be()?;
-        bd.z8                 = r.read_dword_be()?;
+        bd.angle              = r.read_float_le()?;
         bd.u4                 = r.read_word_be()?;
         bd.u5                 = r.read_dword_be()?;
         bd.u6                 = r.read_byte()?;

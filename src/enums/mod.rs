@@ -6,3 +6,4 @@ pub mod major_minor;
 pub mod mechanic;
 pub mod skill_line;
 pub mod tooltip_type;
+pub mod flags;
