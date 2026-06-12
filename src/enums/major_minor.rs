@@ -82,6 +82,8 @@ major_minor_buffs! {
     MajorEndurance      = 14 => "Major Endurance"       => 30,
     MinorEndurance      = 15 => "Minor Endurance"       => 15,
     MajorFortitude      = 16 => "Major Fortitude"       => 30,
+    // 17
+    // 18
     MinorHeroism        = 19 => "Minor Heroism"         => 1,
     MajorHeroism        = 20 => "Major Heroism"         => 3,
     MinorMending        = 21 => "Minor Mending"         => 8,
@@ -96,6 +98,8 @@ major_minor_buffs! {
     MajorMaim           = 30 => "Major Maim"            => 10,
     MinorDefile         = 31 => "Minor Defile"          => 6,
     MajorDefile         = 32 => "Major Defile"          => 12,
+    // 33
+    // 34
     MinorExpedition     = 35 => "Minor Expedition"      => 15,
     MajorExpedition     = 36 => "Major Expedition"      => 30,
     Empower             = 37 => "Empower"               => 70,
@@ -107,14 +111,22 @@ major_minor_buffs! {
     MajorBerserk        = 43 => "Major Berserk"         => 10,
     MinorForce          = 44 => "Minor Force"           => 10,
     MajorForce          = 45 => "Major Force"           => 20,
-    MajorCourage        = 46 => "Major Courage"         => 215,
-    MinorCourage        = 48 => "Minor Courage"         => 430,
+    // 46
+    // 47
+    MinorCourage        = 48 => "Minor Courage"         => 215,
+    MajorCourage        = 49 => "Major Courage"         => 430,
     MinorToughness      = 50 => "Minor Toughness"       => 10,
+    // 51
+    // 52
+    // 53
+    // 54
     Gallop              = 54 => "Gallop"                => 15,
     MinorEnervation     = 55 => "Minor Enervation"      => 10,
     MinorUncertainty    = 56 => "Minor Uncertainty"     => 1314,
     MinorLifesteal      = 57 => "Minor Lifesteal"       => 600,
     MinorMagickasteal   = 58 => "Minor Magickasteal"    => 168,
+    // 59
     MinorVulnerability  = 60 => "Minor Vulnerability"   => 5,
     MajorVulnerability  = 61 => "Major Vulnerability"   => 10,
+    MinorTimidity       = 62 => "Minor Timidity"        => 1,
 }
