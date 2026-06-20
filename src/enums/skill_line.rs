@@ -118,6 +118,8 @@ skill_lines! {
     Clothing = 81 => "Clothing",
     Jewellery = 141 => "Jewellery",
 
+    DeprecatedMagic = 90 => "Deprecated Magic Spellcrafting",
+
     CompanionArdentWarrior = 174 => "Companion Ardent Warrior",
     CompanionDraconicArmorBastian = 175 => "Companion Draconic Armor (Bastian)",
     CompanionRadiatingHeartBastian = 176 => "Companion Radiating Heart (Bastian)",

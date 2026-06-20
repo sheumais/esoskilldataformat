@@ -162,6 +162,7 @@ ability_types! {
     PauseCooldown = 116 => "Pause cooldown",
     DisableGameplayMechanics = 117 => "Disable gameplay mechanics",
     ModifyStackCount = 118 => "Modify stack count",
+    SpecialMoveReplacement = 119 => "Special move replacement"
 }
 
 impl fmt::Display for AbilityType {

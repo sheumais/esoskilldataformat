@@ -5,6 +5,10 @@ use serde::Serialize;
 use serde::ser::SerializeSeq;
 use serde::Serializer;
 
+use crate::enums::ability_type::AbilityType;
+use crate::enums::mechanic::Mechanic;
+use crate::enums::skill_line::SkillLine;
+
 pub mod enums;
 
 pub fn serialize_array<S, T, const N: usize>(arr: &[T; N], s: S) -> Result<S::Ok, S::Error>
@@ -555,12 +559,14 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
         bd.scribing_index     = r.read_dword_be()?;
         bd.player_skill_index = r.read_dword_be()?;
         bd.skill_line_id      = r.read_dword_be()?;
+        debug_assert!(SkillLine::from_id(&bd.skill_line_id).is_some() || bd.skill_line_id == 0, "skill_line_id not known: {} for ability id {}", bd.skill_line_id, skill.ability_id1);
         bd.cast_time          = r.read_dword_be()?;
         bd.value0             = r.read_dword_be()?;
         bd.value1             = r.read_dword_be()?;
         bd.value2             = r.read_dword_be()?;
         bd.range              = r.read_dword_be()?;
         bd.ability_type       = r.read_byte()?;
+        debug_assert!(AbilityType::from_id(&bd.ability_type).is_some(), "ability_type not known: {} for ability id {}", bd.ability_type, skill.ability_id1);
         bd.u2                 = r.read_word_be()?;
         bd.z4                 = r.read_word_be()?;
         bd.z5                 = r.read_word_be()?;
@@ -722,6 +728,7 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
 
     for slot in skill.u16.iter_mut() { *slot = r.read_byte()?; }
     skill.mechanic = r.read_byte()?;
+    debug_assert!(Mechanic::from_id(&skill.mechanic).is_some(), "mechanic not known: {} for ability id {}", skill.mechanic, skill.ability_id1);
     skill.u17      = r.read_byte()?;
     for slot in skill.u18.iter_mut() { *slot = r.read_byte()?; }
     skill.size19 = r.read_dword_be()?;

@@ -9,6 +9,8 @@ pub enum Mechanic {
     Ultimate,
     Health,
     EqualHealthAndMagicka,
+    EqualHealthAndStamina,
+    WerewolfFury,
 }
 
 impl Mechanic {
@@ -16,12 +18,14 @@ impl Mechanic {
         match id {
             0  => Some(Self::None),
             1  => Some(Self::Magicka),
+            2  => Some(Self::WerewolfFury),
             4  => Some(Self::Stamina),
             5  => Some(Self::EqualMagickaAndStamina),
             8  => Some(Self::Ultimate),
             32 => Some(Self::Health),
             33 => Some(Self::EqualHealthAndMagicka),
-            _  => panic!("Unknown Mechanic: {}", id),
+            36 => Some(Self::EqualHealthAndStamina),
+            _  => return None,
         }
     }
 
@@ -34,6 +38,8 @@ impl Mechanic {
             Self::Ultimate              => "Ultimate",
             Self::Health                => "Health",
             Self::EqualHealthAndMagicka => "Equal Health and Magicka",
+            Self::EqualHealthAndStamina => "Equal Health and Stamina",
+            Self::WerewolfFury          => "Werewolf Fury",
         }
     }
 }
