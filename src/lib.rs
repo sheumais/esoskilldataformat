@@ -28,10 +28,10 @@ pub const U2ASIZE:   usize = 5;
 pub const U4SIZE:    usize = 6;
 pub const U6SIZE:    usize = 33;
 pub const U8SIZE:    usize = 3;
-pub const U10SIZE:   usize = 4;
+pub const U10SIZE:   usize = 16;
 pub const U11SIZE:   usize = 12;
 pub const U12SIZE:   usize = 27;
-pub const U13SIZE:   usize = 8;
+pub const U13SIZE:   usize = 32;
 pub const U15SIZE:   usize = 13;
 pub const U16SIZE:   usize = 5;
 pub const U18SIZE:   usize = 32;
@@ -150,6 +150,13 @@ pub struct List11Data {
     #[serde(skip_serializing_if = "is_empty_vec")] pub list11b: Vec<u32>,
 }
 
+#[derive(Debug, Default, Serialize, PartialEq, Clone)]
+pub struct List13AData {
+    #[serde(skip_serializing_if = "is_zero_u8")]  pub u1:                          u8,
+    #[serde(skip_serializing_if = "is_zero_u8")]  pub threshold_below_health_pct:  u8,
+    #[serde(skip_serializing_if = "is_zero_u16")] pub bonus_up_to_pct:             u16,
+}
+
 #[derive(Debug, Serialize, PartialEq, Clone)]
 pub struct SkillData34 {
     #[serde(skip_serializing_if = "always_skip_serialization")] pub start_offset:   u64,
@@ -198,19 +205,19 @@ pub struct SkillData34 {
     #[serde(skip_serializing_if = "is_zero_u32")]               pub u9b:            u32,
     #[serde(skip_serializing_if = "is_zero_u32")]               pub size9:          u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list9:          Vec<List9Data>,
-    #[serde(serialize_with = "serialize_array")]                pub u10:            [u32; U10SIZE],
+    #[serde(serialize_with = "serialize_array")]                pub u10:            [u8; U10SIZE],
     #[serde(skip_serializing_if = "is_zero_u32")]               pub size11:         u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list11:         Vec<List11Data>,
     #[serde(serialize_with = "serialize_array")]                pub u11:            [u8; U11SIZE],
     #[serde(serialize_with = "serialize_array")]                pub u12:            [u8; U12SIZE],
     #[serde(skip_serializing_if = "is_zero_u32")]               pub size13:         u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list13:         Vec<u8>,
-    #[serde(serialize_with = "serialize_array")]                pub u13:            [u32; U13SIZE],
+    #[serde(serialize_with = "serialize_array")]                pub u13:            [u8; U13SIZE],
     #[serde(skip_serializing_if = "is_zero_u8")]                pub u13a:           u8,
     #[serde(skip_serializing_if = "is_zero_u32")]               pub u14:            u32,
     #[serde(serialize_with = "serialize_array")]                pub u15:            [u8; U15SIZE],
     #[serde(skip_serializing_if = "is_zero_u32")]               pub size13a:        u32,
-    #[serde(skip_serializing_if = "is_empty_vec")]              pub list13a:        Vec<u32>,
+    #[serde(skip_serializing_if = "is_empty_vec")]              pub list13a:        Vec<List13AData>,
     #[serde(skip_serializing_if = "is_zero_u32")]               pub u15a:           u32,
     #[serde(skip_serializing_if = "is_zero_u32")]               pub size14:         u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list14:         Vec<u8>,
@@ -276,14 +283,14 @@ impl Default for SkillData34 {
             u9b:            0,
             size9:          0,
             list9:          Vec::new(),
-            u10:            [0u32; U10SIZE],
+            u10:            [0u8; U10SIZE],
             size11:         0,
             list11:         Vec::new(),
             u11:            [0u8; U11SIZE],
             u12:            [0u8; U12SIZE],
             size13:         0,
             list13:         Vec::new(),
-            u13:            [0u32; U13SIZE],
+            u13:            [0u8; U13SIZE],
             u13a:           0,
             u14:            0,
             u15:            [0u8; U15SIZE],
@@ -692,7 +699,7 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
     }
 
 
-    for slot in skill.u10.iter_mut() { *slot = r.read_dword_be()?; }
+    for slot in skill.u10.iter_mut() { *slot = r.read_byte()?; }
 
     skill.size11 = r.read_dword_be()?;
     skill.list11.reserve(skill.size11 as usize);
@@ -711,16 +718,22 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
     skill.size13 = r.read_dword_be()?;
     skill.list13 = r.read_bytes(skill.size13 as usize * 6)?;
 
-    for slot in skill.u13.iter_mut() { *slot = r.read_dword_be()?; }
+    for slot in skill.u13.iter_mut() { *slot = r.read_byte()?; }
     skill.u13a = r.read_byte()?;
     skill.u14  = r.read_dword_be()?;
 
     for slot in skill.u15.iter_mut() { *slot = r.read_byte()?; }
 
     skill.size13a = r.read_dword_be()?;
-    skill.list13a = (0..skill.size13a)
-        .map(|_| r.read_dword_be())
-        .collect::<io::Result<_>>()?;
+    skill.list13a.reserve(skill.size13a as usize);
+    debug_assert!(skill.size13a < 2, "size13a > 1");
+    for _ in 0..skill.size13a {
+        skill.list13a.push(List13AData {
+            u1:                         r.read_byte()?,
+            threshold_below_health_pct: r.read_byte()?,
+            bonus_up_to_pct:            r.read_word_be()?,
+        });
+    }
     skill.u15a = r.read_dword_be()?;
 
     skill.size14 = r.read_dword_be()?;
