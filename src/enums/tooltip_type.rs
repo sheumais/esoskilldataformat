@@ -40,6 +40,7 @@ pub enum TooltipType {
     BuffExplanationText,
     BuffExplanationText2,
     MajorMinorBuffGain,
+    NoblesConquest,
 }
 
 impl TooltipType {
@@ -62,6 +63,7 @@ impl TooltipType {
             51  => Some(Self::DeprecatedMultiHit),
             52  => Some(Self::SingleTargetHeal),
             53  => Some(Self::AreaHoT),
+            54  => Some(Self::NoblesConquest),
             55  => Some(Self::Percentage),
             56  => Some(Self::IncreaseDurationOf),
             57  => Some(Self::DeprecatedHalfSecondDuration),
@@ -127,6 +129,7 @@ impl TooltipType {
             Self::BuffExplanationText         => "BuffExplanationText",
             Self::BuffExplanationText2        => "BuffExplanationText2",
             Self::MajorMinorBuffGain          => "MajorMinorBuffGain",
+            Self::NoblesConquest              => "NoblesConquest",
         }
     }
 }

@@ -8,6 +8,7 @@ use serde::Serializer;
 use crate::enums::ability_type::AbilityType;
 use crate::enums::mechanic::Mechanic;
 use crate::enums::skill_line::SkillLine;
+use crate::enums::tooltip_type::TooltipType;
 
 pub mod enums;
 
@@ -636,6 +637,7 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
         td.tooltip_types     = (0..td.num_tooltip_types)
             .map(|_| r.read_dword_be())
             .collect::<io::Result<_>>()?;
+        debug_assert!(td.tooltip_types.iter().all(|f| TooltipType::from_id(f).is_some()), "Tooltip type in {:?} didn't match for id {}", td.tooltip_types, skill.ability_id1);
         td.num_tooltip_ids   = r.read_dword_be()?;
         td.tooltip_ids       = (0..td.num_tooltip_ids)
             .map(|_| r.read_dword_be())
