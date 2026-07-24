@@ -58,9 +58,9 @@ pub struct SkillBaseData {
     #[serde(skip_serializing_if = "is_zero_u32")] pub player_skill_index: u32,
     #[serde(skip_serializing_if = "is_zero_u32")] pub skill_line_id:      u32,
     #[serde(skip_serializing_if = "is_zero_u32")] pub cast_time:          u32,
-    #[serde(skip_serializing_if = "is_zero_u32")] pub value0:             u32,
-    #[serde(skip_serializing_if = "is_zero_u32")] pub value1:             u32,
-    #[serde(skip_serializing_if = "is_zero_u32")] pub value2:             u32,
+    #[serde(skip_serializing_if = "is_zero_i32")] pub value0:             i32,
+    #[serde(skip_serializing_if = "is_zero_i32")] pub value1:             i32,
+    #[serde(skip_serializing_if = "is_zero_i32")] pub value2:             i32,
     #[serde(skip_serializing_if = "is_zero_u32")] pub range:              u32,
     #[serde(skip_serializing_if = "is_zero_u8")]  pub ability_type:       u8,
     #[serde(skip_serializing_if = "is_zero_u16")] pub u2:                 u16,
@@ -455,6 +455,12 @@ impl<R: Read + Seek> ByteReader<R> {
         Ok(u32::from_le_bytes(buf))
     }
 
+    pub fn read_idword_be(&mut self) -> io::Result<i32> {
+        let mut buf = [0u8; 4];
+        self.inner.read_exact(&mut buf)?;
+        Ok(i32::from_be_bytes(buf))
+    }
+
     pub fn read_float_le(&mut self) -> io::Result<f32> {
         let bits = self.read_dword_le()?;
         Ok(f32::from_bits(bits))
@@ -588,9 +594,9 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
         bd.skill_line_id      = r.read_dword_be()?;
         debug_assert!(SkillLine::from_id(&bd.skill_line_id).is_some() || bd.skill_line_id == 0, "skill_line_id not known: {} for ability id {}", bd.skill_line_id, skill.ability_id1);
         bd.cast_time          = r.read_dword_be()?;
-        bd.value0             = r.read_dword_be()?;
-        bd.value1             = r.read_dword_be()?;
-        bd.value2             = r.read_dword_be()?;
+        bd.value0             = r.read_idword_be()?;
+        bd.value1             = r.read_idword_be()?;
+        bd.value2             = r.read_idword_be()?;
         bd.range              = r.read_dword_be()?;
         bd.ability_type       = r.read_byte()?;
         debug_assert!(AbilityType::from_id(&bd.ability_type).is_some(), "ability_type not known: {} for ability id {}", bd.ability_type, skill.ability_id1);
