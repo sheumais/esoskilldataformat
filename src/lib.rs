@@ -1,28 +1,14 @@
 use std::collections::HashMap;
-use std::io::{self, Read, Seek, SeekFrom};
+use std::io::{self, Read, Seek};
 
 use serde::Serialize;
-use serde::ser::SerializeSeq;
-use serde::Serializer;
-
+use eso_common::*;
 use crate::enums::ability_type::AbilityType;
 use crate::enums::mechanic::Mechanic;
 use crate::enums::skill_line::SkillLine;
 use crate::enums::tooltip_type::TooltipType;
 
 pub mod enums;
-
-pub fn serialize_array<S, T, const N: usize>(arr: &[T; N], s: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-    T: serde::Serialize,
-{
-    let mut seq = s.serialize_seq(Some(N))?;
-    for b in arr.iter() {
-        seq.serialize_element(b)?;
-    }
-    seq.end()
-}
 
 pub const FLAGSIZE:  usize = 176;
 pub const U2ASIZE:   usize = 5;
@@ -36,19 +22,9 @@ pub const U13SIZE:   usize = 16;
 pub const U15SIZE:   usize = 15;
 pub const U18SIZE:   usize = 13;
 pub const U22SIZE:   usize = 5;
-pub const U24SIZE:   usize = 32;
+pub const U24SIZE:   usize = 33;
 
 const SKILLDATA_RECORDSIZE_OFFSET: u64 = 32;
-
-pub fn is_zero_u8(v: &u8)       -> bool { *v == 0 }
-pub fn is_zero_u16(v: &u16)     -> bool { *v == 0 }
-pub fn is_zero_u32(v: &u32)     -> bool { *v == 0 }
-pub fn is_zero_i32(v: &i32)     -> bool { *v == 0 }
-pub fn is_zero_f32(v: &f32)     -> bool { *v == 0.0 }
-pub fn is_empty_str(v: &String) -> bool { v.is_empty() }
-pub fn is_empty_vec<T>(v: &Vec<T>) -> bool where T: Default + PartialEq { v.is_empty() || v.iter().all(|f| f == &T::default()) }
-pub fn is_empty_array<T, const N: usize>(v: &[T; N]) -> bool where T: Default + PartialEq {v.iter().all(|f| f == &T::default())}
-pub fn always_skip_serialization<T>(_v: &T) -> bool { true }
 
 #[derive(Debug, Default, Serialize, PartialEq, Clone)]
 pub struct SkillBaseData {
@@ -57,6 +33,7 @@ pub struct SkillBaseData {
     #[serde(skip_serializing_if = "is_zero_u32")] pub scribing_index:     u32,
     #[serde(skip_serializing_if = "is_zero_u32")] pub player_skill_index: u32,
     #[serde(skip_serializing_if = "is_zero_u32")] pub skill_line_id:      u32,
+    #[serde(skip_serializing_if = "is_zero_u32")] pub maybe_idk:          u32,
     #[serde(skip_serializing_if = "is_zero_u32")] pub cast_time:          u32,
     #[serde(skip_serializing_if = "is_zero_i32")] pub value0:             i32,
     #[serde(skip_serializing_if = "is_zero_i32")] pub value1:             i32,
@@ -81,6 +58,7 @@ pub struct SkillBaseData {
 
 #[derive(Debug, Default, Serialize, PartialEq, Clone)]
 pub struct PreSkillCoef {
+    #[serde(skip_serializing_if = "is_zero_u16")] pub u0: u16,
     #[serde(skip_serializing_if = "is_zero_u32")] pub u1: u32,
     #[serde(skip_serializing_if = "is_zero_u32")] pub u2: u32,
     #[serde(skip_serializing_if = "is_zero_u32")] pub u3: u32,
@@ -409,89 +387,6 @@ impl Default for ParserState {
     }
 }
 
-pub struct ByteReader<R: Read + Seek> {
-    inner: R,
-}
-
-impl<R: Read + Seek> ByteReader<R> {
-    pub fn new(inner: R) -> Self { Self { inner } }
-
-    pub fn tell(&mut self) -> io::Result<u64> {
-        self.inner.stream_position()
-    }
-
-    pub fn seek(&mut self, pos: u64) -> io::Result<()> {
-        self.inner.seek(SeekFrom::Start(pos))?;
-        Ok(())
-    }
-
-    pub fn read_byte(&mut self) -> io::Result<u8> {
-        let mut buf = [0u8; 1];
-        self.inner.read_exact(&mut buf)?;
-        Ok(buf[0])
-    }
-
-    pub fn read_word_be(&mut self) -> io::Result<u16> {
-        let mut buf = [0u8; 2];
-        self.inner.read_exact(&mut buf)?;
-        Ok(u16::from_be_bytes(buf))
-    }
-
-    pub fn read_word_le(&mut self) -> io::Result<u16> {
-        let mut buf = [0u8; 2];
-        self.inner.read_exact(&mut buf)?;
-        Ok(u16::from_le_bytes(buf))
-    }
-
-    pub fn read_dword_be(&mut self) -> io::Result<u32> {
-        let mut buf = [0u8; 4];
-        self.inner.read_exact(&mut buf)?;
-        Ok(u32::from_be_bytes(buf))
-    }
-
-    pub fn read_dword_le(&mut self) -> io::Result<u32> {
-        let mut buf = [0u8; 4];
-        self.inner.read_exact(&mut buf)?;
-        Ok(u32::from_le_bytes(buf))
-    }
-
-    pub fn read_idword_be(&mut self) -> io::Result<i32> {
-        let mut buf = [0u8; 4];
-        self.inner.read_exact(&mut buf)?;
-        Ok(i32::from_be_bytes(buf))
-    }
-
-    pub fn read_float_le(&mut self) -> io::Result<f32> {
-        let bits = self.read_dword_le()?;
-        Ok(f32::from_bits(bits))
-    }
-
-    pub fn read_bytes(&mut self, n: usize) -> io::Result<Vec<u8>> {
-        let mut buf = vec![0u8; n];
-        self.inner.read_exact(&mut buf)?;
-        Ok(buf)
-    }
-}
-
-impl ByteReader<std::fs::File> {
-    pub fn open(filename: &str) -> io::Result<Self> {
-        let f = std::fs::File::open(filename)?;
-        Ok(Self::new(f))
-    }
-
-    pub fn file_size(&mut self) -> io::Result<u64> {
-        let cur = self.tell()?;
-        let end = self.inner.seek(SeekFrom::End(0))?;
-        self.seek(cur)?;
-        Ok(end)
-    }
-}
-
-fn report_error(msg: &str) -> io::Error {
-    eprintln!("{msg}");
-    io::Error::new(io::ErrorKind::InvalidData, msg.to_string())
-}
-
 pub fn load_skill_data(filename: &str) -> io::Result<ParserState> {
     let mut state = ParserState::new();
     eprintln!("Loading and parsing skill data file '{filename}'...");
@@ -593,6 +488,7 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
         bd.player_skill_index = r.read_dword_be()?;
         bd.skill_line_id      = r.read_dword_be()?;
         debug_assert!(SkillLine::from_id(&bd.skill_line_id).is_some() || bd.skill_line_id == 0, "skill_line_id not known: {} for ability id {}", bd.skill_line_id, skill.ability_id1);
+        bd.maybe_idk          = r.read_dword_be()?;
         bd.cast_time          = r.read_dword_be()?;
         bd.value0             = r.read_idword_be()?;
         bd.value1             = r.read_idword_be()?;
@@ -678,6 +574,7 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
 
     {
         let p = &mut skill.pre;
+        p.u0 = r.read_word_be()?;
         p.u1 = r.read_dword_be()?;
         p.u2 = r.read_dword_be()?;
         p.u3 = r.read_dword_be()?;

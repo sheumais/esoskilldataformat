@@ -41,6 +41,7 @@ pub enum TooltipType {
     BuffExplanationText2,
     MajorMinorBuffGain,
     NoblesConquest,
+    TargetCap,
 }
 
 impl TooltipType {
@@ -56,6 +57,7 @@ impl TooltipType {
             20  => Some(Self::Duration),
             21  => Some(Self::DeprecatedChampionPoints),
             22  => Some(Self::DeprecatedChampionPoints2),
+            29  => Some(Self::TargetCap),
             31  => Some(Self::IncreasedDurationVsMonsters),
             44  => Some(Self::MinimumCooldown),
             48  => Some(Self::DeprecatedZeroDuration),
@@ -130,6 +132,7 @@ impl TooltipType {
             Self::BuffExplanationText2        => "BuffExplanationText2",
             Self::MajorMinorBuffGain          => "MajorMinorBuffGain",
             Self::NoblesConquest              => "NoblesConquest",
+            Self::TargetCap                   => "TargetCap",
         }
     }
 }
