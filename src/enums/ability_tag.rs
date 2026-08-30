@@ -134,7 +134,7 @@ ability_tags! {
     Sigil = 376 => "Sigil",
     SelfHealShieldAbility = 379 => "SelfHealShieldAbility",
     StealthDetection = 380 => "StealthDetection",
-    WeaponabilityStampede = 381 => "WeaponabilityStampede",
+    WeaponAbilityStampede = 381 => "WeaponAbilityStampede",
     WeaponAbilityLowSlash = 382 => "WeaponAbilityLowSlash",
     WeaponAbilityFlurry = 385 => "WeaponAbilityFlurry",
     RakkhatPads = 392 => "RakkhatPads",
