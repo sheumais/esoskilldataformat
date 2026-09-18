@@ -44,23 +44,30 @@ macro_rules! ability_tags {
 ability_tags! {
     UIAffectingPassive = 0 => "UIAffectingPassive", // lockpicking, guard interactions, cyrodiil fighter's guild quests
     MundusBoon = 5 => "MundusBoon",
+    PsijicOrderAbility = 8 => "PsijicOrderAbility",
     DestructionStaffAbility = 15 => "DestructionStaffAbility",
+    OffBalance = 17 => "OffBalance",
     SkillLineDarkMagicAbility = 31 => "SkillLineDarkMagicAbility",
+    SkillLineDaedricSummoningAbility = 34 => "SkillLineDaedricSummoningAbility",
+    SkillLineEarthenHeartAbility = 37 => "SkillLineEarthenHeartAbility",
     BashDamageAbility = 50 => "BashDamageAbility",
     HeavyAttackStaff = 68 => "HeavyAttackStaff",
+    SkillLineRestoringLightAbility = 77 => "SkillLineRestoringLightAbility",
     Comet = 81 => "Comet",
     HealingOnlyAbility = 85 => "HealingOnlyAbility", // for heals that don't do damage
     StealthRelated = 95 => "StealthRelated",
     PoisonDebuff = 97 => "PoisonDebuff",
     Undodgable = 122 => "Undodgable",
+    EnemyHeavyAbility = 124 => "EnemyHeavyAbility", // uncertain
     PullAbility = 131 => "PullAbility", // both towards you and towards target
     Interrupts = 133 => "Interrupts",
     EnemyDurationAbility = 138 => "EnemyDurationAbility",
     EnemyAOEAbility = 139 => "EnemyAOEAbility",
     EnemyCastTimeAbility = 140 => "EnemyCastTimeAbility",
     HeavyAttack = 144 => "HeavyAttack",
-    TwoHandedAbility = 154 => "TwoHandedAbility",
     HeavyAttackWeaponsAndMelee = 148 => "HeavyAttackWeaponsAndMelee",
+    TwoHandedAbility = 154 => "TwoHandedAbility",
+    PotionEffects = 156 => "PotionEffects",
     DeprecatedSiegeWeapon = 157 => "DeprecatedSiegeWeapon",
     EnchantmentPoisonEffects = 161 => "EnchantmentPoisonEffects",
     DiscoveredWhileDisguised = 168 => "DiscoveredWhileDisguised",
@@ -114,7 +121,6 @@ ability_tags! {
     Mutilate = 320 => "Mutilate",
     ClassSkill = 324 => "ClassSkill",
     ExecuteScalingAbility = 326 => "ExecuteScalingAbility",
-    SkillLineVampireAbility = 334 => "SkillLineVampireAbility",
     ClassPassive = 335 => "ClassPassive",
     WeaponPassive = 337 => "WeaponPassive",
     ArmourAbility = 338 => "ArmourAbility",
@@ -122,6 +128,7 @@ ability_tags! {
     SoulAbility = 340 => "SoulAbility",
     SoulPassive = 341 => "SoulPassive",
     SkillLineWerewolfAbility = 342 => "SkillLineWerewolfAbility",
+    SkillLineVampireAbility = 344 => "SkillLineVampireAbility",
     SkillLineFightersGuildAbility = 346 => "SkillLineFightersGuildAbility",
     SkillLineMagesGuildAbility = 348 => "SkillLineMagesGuildAbility",
     SkillLineMagesGuildPassive = 349 => "SkillLineMagesGuildPassive",
@@ -171,6 +178,7 @@ ability_tags! {
     CloudrestUpstairsMechanicsFromMinis = 701 => "CloudrestUpstairsMechanicsFromMinis",
     SloadsSemblanceSet = 735 => "SloadsSemblanceSet",
     AOEWithPhysics = 752 => "AOEWithPhysics", // siege, necrotic orb, deep fissure
+    Cleanse = 758 => "Cleanse",
     WeaponAbilityUppercut = 759 => "WeaponAbilityUppercut",
     SkillLineGraveLordAbility = 782 => "SkillLineGraveLordAbility",
     SkillLineBoneTyrantAbility = 783 => "SkillLineBoneTyrantAbility",
@@ -182,6 +190,7 @@ ability_tags! {
     PlayerTransformationAbility = 838 => "PlayerTransformationAbility",
     SummonAnchors = 852 => "SummonAnchors",
     PuzzleCube = 857 => "PuzzleCube",
+    VampireBlink = 870 => "VampireBlink",
     BloodScionAbility = 957 => "BloodScionAbility",
     IncreasedXPAPGain = 989 => "IncreasedXPAPGain",
     TetherBetweenTwoPlayersMechanic = 996 => "TetherBetweenTwoPlayersMechanic", // mind link from coral aerie and arcane conveyance from LC
@@ -205,5 +214,4 @@ ability_tags! {
     KazpianAbility = 1188 => "KazpianAbility",
     BalefulDarkness = 1205 => "BalefulDarkness",
     NightMarketDregsEvent = 1211 => "NightMarketDregsEvent",
-    OpulentOrdealMechanics = 1227 => "OpulentOrdealMechanics",
 }
