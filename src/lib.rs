@@ -188,7 +188,7 @@ pub struct SkillData34 {
     #[serde(skip_serializing_if = "always_skip_serialization")] pub size7:          u16,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list7:          Vec<u32>,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub u8a:            Vec<u8>,
-    #[serde(skip_serializing_if = "is_empty_vec")]              pub u8b:            Vec<u8>,
+    #[serde(skip_serializing_if = "is_zero_u32")]               pub u8b:            u32,
     #[serde(skip_serializing_if = "is_zero_u32")]               pub u8c:            u32,
     #[serde(skip_serializing_if = "always_skip_serialization")] pub size8:          u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list8:          Vec<u32>,
@@ -270,7 +270,7 @@ impl Default for SkillData34 {
             size7:          0,
             list7:          Vec::new(),
             u8a:            Vec::new(),
-            u8b:            Vec::new(),
+            u8b:            0,
             u8c:            0,
             size8:          0,
             list8:          Vec::new(),
@@ -610,9 +610,7 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
     skill.u8a = (0..4)
         .map(|_| r.read_byte())
         .collect::<io::Result<_>>()?;
-    skill.u8b = (0..4)
-        .map(|_| r.read_byte())
-        .collect::<io::Result<_>>()?;
+    skill.u8b = r.read_dword_be()?;
     skill.u8c = r.read_dword_be()?;
 
     skill.size8 = r.read_dword_be()?;
