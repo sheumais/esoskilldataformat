@@ -57,6 +57,7 @@ ability_tags! {
     HealingOnlyAbility = 85 => "HealingOnlyAbility", // for heals that don't do damage
     StealthRelated = 95 => "StealthRelated",
     PoisonDebuff = 97 => "PoisonDebuff",
+    AutomaticBlock = 112 => "AutomaticBlock",
     Undodgable = 122 => "Undodgable",
     EnemyHeavyAbility = 124 => "EnemyHeavyAbility", // uncertain
     PullAbility = 131 => "PullAbility", // both towards you and towards target
@@ -184,6 +185,7 @@ ability_tags! {
     SkillLineBoneTyrantAbility = 783 => "SkillLineBoneTyrantAbility",
     SkillLineLivingDeathAbility = 784 => "SkillLineLivingDeathAbility",
     HeavyAttackOverload = 785 => "HeavyAttackOverload",
+    ImmobiliseSnareImmunity = 786 => "ImmobiliseSnareImmunity",
     CreatesCorpsesOnDeath = 789 => "CreatesCorpsesOnDeath",
     PuzzleCubeMovement = 793 => "PuzzleCubeMovement",
     ConsumesCorpses = 833 => "ConsumesCorpses",
