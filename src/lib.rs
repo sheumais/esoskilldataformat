@@ -20,7 +20,7 @@ pub const U2ASIZE:   usize = 5;
 pub const U4SIZE:    usize = 6;
 pub const U6SIZE:    usize = 33;
 pub const U8SIZE:    usize = 24;
-pub const U10SIZE:   usize = 16;
+pub const U10SIZE:   usize = 14;
 pub const U11SIZE:   usize = 12;
 pub const U12SIZE:   usize = 27;
 pub const U13SIZE:   usize = 16;
@@ -247,6 +247,7 @@ pub struct SkillData34 {
     #[serde(skip_serializing_if = "is_empty_vec")]              pub u9b:            Vec<u8>,
     #[serde(skip_serializing_if = "always_skip_serialization")] pub size9:          u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list9:          Vec<List9Data>,
+    #[serde(skip_serializing_if = "is_zero_u16")]               pub half_width:     u16,
     #[serde(serialize_with = "serialize_array", skip_serializing_if = "is_empty_array")] pub u10: [u8; U10SIZE],
     #[serde(skip_serializing_if = "always_skip_serialization")] pub size11:         u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list11:         Vec<List11Data>,
@@ -329,6 +330,7 @@ impl Default for SkillData34 {
             u9b:            Vec::new(),
             size9:          0,
             list9:          Vec::new(),
+            half_width:     0,
             u10:            [0u8; U10SIZE],
             size11:         0,
             list11:         Vec::new(),
@@ -1093,6 +1095,7 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
     }
 
 
+    skill.half_width = r.read_word_be()?;
     for slot in skill.u10.iter_mut() { *slot = r.read_byte()?; }
 
     skill.size11 = r.read_dword_be()?;
