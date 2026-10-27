@@ -15,7 +15,7 @@ use crate::enums::tooltip_type::TooltipType;
 
 pub mod enums;
 
-pub const FLAGSIZE:  usize = 176;
+pub const FLAGSIZE:  usize = 177;
 pub const U2ASIZE:   usize = 5;
 pub const U4SIZE:    usize = 6;
 pub const U6SIZE:    usize = 33;
@@ -30,6 +30,7 @@ pub const U22SIZE:   usize = 5;
 pub const U24SIZE:   usize = 33;
 
 const SKILLDATA_RECORDSIZE_OFFSET: u64 = 32;
+const SKILLDATA_HEADER_SIZE: u64 = 36; // magic, index, 2x length, unknown1, id, unknown3, length3, id2
 
 #[derive(Debug, Default, Serialize, PartialEq, Clone)]
 pub struct SkillBaseData {
@@ -39,6 +40,7 @@ pub struct SkillBaseData {
     #[serde(skip_serializing_if = "is_zero_u32")] pub player_skill_index: u32,
     #[serde(skip_serializing_if = "is_zero_u32")] pub skill_line_id:      u32,
     #[serde(skip_serializing_if = "is_zero_u32")] pub maybe_idk:          u32,
+    #[serde(skip_serializing_if = "is_zero_u64")] pub uid:                u64,
     #[serde(skip_serializing_if = "is_zero_u32")] pub cast_time:          u32,
     #[serde(skip_serializing_if = "is_zero_i32")] pub value0:             i32,
     #[serde(skip_serializing_if = "is_zero_i32")] pub value1:             i32,
@@ -81,7 +83,6 @@ pub struct PostSkillCoef {
     #[serde(skip_serializing_if = "is_empty_vec")] pub u5: Vec<u8>,
     #[serde(skip_serializing_if = "is_zero_u8")]   pub u6: u8,
     #[serde(skip_serializing_if = "is_zero_u32")]  pub u7: u32,
-    #[serde(skip_serializing_if = "is_zero_u16")]  pub u8: u16,
 }
 
 #[derive(Debug, Default, Serialize, PartialEq, Clone)]
@@ -106,6 +107,7 @@ pub struct List26Data {
 
 #[derive(Debug, Default, Serialize, PartialEq, Clone)]
 pub struct U5Data {
+    #[serde(skip_serializing_if = "is_zero_u64")] pub uid: u64,
     #[serde(skip_serializing_if = "is_zero_u32")]  pub s5a: u32,
     #[serde(skip_serializing_if = "is_empty_vec")] pub d5a: Vec<u32>,
     #[serde(skip_serializing_if = "is_zero_u32")]  pub s5b: u32,
@@ -114,6 +116,7 @@ pub struct U5Data {
 
 #[derive(Debug, Default, Serialize, PartialEq, Clone)]
 pub struct TooltipData {
+    #[serde(skip_serializing_if = "is_zero_u64")] pub uid: u64,
     #[serde(skip_serializing_if = "is_zero_u32")]  pub num_tooltip_types: u32,
     #[serde(skip_serializing_if = "is_empty_vec")] pub tooltip_types:     Vec<u32>,
     #[serde(skip_serializing_if = "is_zero_u32")]  pub num_tooltip_ids:   u32,
@@ -122,6 +125,7 @@ pub struct TooltipData {
 
 #[derive(Debug, Default, Serialize, PartialEq, Clone)]
 pub struct List9Data {
+    #[serde(skip_serializing_if = "is_zero_u64")] pub uid: u64,
     #[serde(skip_serializing_if = "always_skip_serialization")]  pub size9a: u32,
     #[serde(skip_serializing_if = "is_empty_vec")] pub list9a: Vec<u32>,
     #[serde(skip_serializing_if = "always_skip_serialization")]  pub size9b: u32,
@@ -130,6 +134,7 @@ pub struct List9Data {
 
 #[derive(Debug, Default, Serialize, PartialEq, Clone)]
 pub struct List11Data {
+    #[serde(skip_serializing_if = "is_zero_u64")] pub uid: u64,
     #[serde(skip_serializing_if = "always_skip_serialization")]  pub size11a: u32,
     #[serde(skip_serializing_if = "is_empty_vec")] pub list11a: Vec<u32>,
     #[serde(skip_serializing_if = "always_skip_serialization")]  pub size11b: u32,
@@ -238,7 +243,7 @@ pub struct SkillData34 {
     pub post:                                                   PostSkillCoef,
     #[serde(skip_serializing_if = "always_skip_serialization")] pub size7:          u16,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list7:          Vec<u32>,
-    #[serde(skip_serializing_if = "is_empty_vec")]              pub u8a:            Vec<u8>,
+    #[serde(skip_serializing_if = "is_zero_f32")]               pub f8a:            f32,
     #[serde(skip_serializing_if = "is_zero_u32")]               pub icon_file_index:u32,
     #[serde(skip_serializing_if = "is_zero_u32")]               pub u8c:            u32,
     #[serde(skip_serializing_if = "always_skip_serialization")] pub size8:          u32,
@@ -321,7 +326,7 @@ impl Default for SkillData34 {
             post:           PostSkillCoef::default(),
             size7:          0,
             list7:          Vec::new(),
-            u8a:            Vec::new(),
+            f8a:            0.0,
             icon_file_index:0,
             u8c:            0,
             size8:          0,
@@ -576,15 +581,24 @@ impl SkillData34 {
 
     fn is_weapon_spell(t: u8) -> bool { matches!(t, 25 | 35) }
     fn is_resource(t: u8) -> bool { matches!(t, 4 | 29) }
+    fn is_resist(t: u8) -> bool { matches!(t, 13 | 22) }
+
+    fn is_pair(a: u8, b: u8) -> bool {
+        a != b
+            && ((Self::is_weapon_spell(a) && Self::is_weapon_spell(b))
+                || (Self::is_resource(a) && Self::is_resource(b))
+                || (Self::is_resist(a) && Self::is_resist(b)))
+    }
 
     fn paired_term(t1: u8, t2: u8, coef: f32) -> String {
         match (t1, t2) {
             (25, 35) | (35, 25) => format!("{coef}×MaxPower"),
             (4, 29) | (29, 4) => format!("{coef}×MaxResource"),
+            (22, 13) | (13, 22) => format!("{coef}×MaxResist"),
             _ => format!(
                 "{coef}×max({}, {})",
-                CoefficientType::from_id(&t1).unwrap().as_str(),
-                CoefficientType::from_id(&t2).unwrap().as_str(),
+                CoefficientType::from_id(&t1).map_or("unknown", |t| t.as_str()),
+                CoefficientType::from_id(&t2).map_or("unknown", |t| t.as_str()),
             ),
         }
     }
@@ -604,47 +618,36 @@ impl SkillData34 {
             return None;
         }
 
-        let coef_str = |id, coef| {
+        let coef_str = |id: u8, coef: f32| {
             CoefficientType::from_id(&id)
                 .map(|t| format!("{coef}×{}", t.as_str()))
                 .unwrap_or_else(|| format!("{coef}×unknown({id})"))
         };
 
-        if let [(t1, c1), (t2, c2), (t3, c3), (t4, c4)] = terms.as_slice() {
-            if c1 == c3
-                && c2 == c4
-                && Self::is_weapon_spell(*t1)
-                && Self::is_resource(*t2)
-                && Self::is_weapon_spell(*t3)
-                && Self::is_resource(*t4)
-            {
-                return Some(format!(
-                    "{} + {}",
-                    Self::paired_term(*t1, *t3, *c1),
-                    Self::paired_term(*t2, *t4, *c2),
-                ));
+        let mut used = vec![false; terms.len()];
+        let mut parts = Vec::with_capacity(terms.len());
+
+        for i in 0..terms.len() {
+            if used[i] {
+                continue;
+            }
+            used[i] = true;
+            let (t1, c1) = terms[i];
+
+            // Find a later, unused term in the same group with an identical coefficient.
+            let partner = (i + 1..terms.len())
+                .find(|&j| !used[j] && terms[j].1 == c1 && Self::is_pair(t1, terms[j].0));
+
+            match partner {
+                Some(j) => {
+                    used[j] = true;
+                    parts.push(Self::paired_term(t1, terms[j].0, c1));
+                }
+                None => parts.push(coef_str(t1, c1)),
             }
         }
 
-        if let [(t1, c1), (t3, c3)] = terms.as_slice() {
-            if c1 == c3 && Self::is_weapon_spell(*t1) && Self::is_weapon_spell(*t3) {
-                return Some(Self::paired_term(*t1, *t3, *c1));
-            }
-        }
-
-        if let [(t1, c1), (t3, c3)] = terms.as_slice() {
-            if c1 == c3 && Self::is_resource(*t1) && Self::is_resource(*t3) {
-                return Some(Self::paired_term(*t1, *t3, *c1));
-            }
-        }
-
-        Some(
-            terms
-                .into_iter()
-                .map(|(id, coef)| coef_str(id, coef))
-                .collect::<Vec<_>>()
-                .join(" + "),
-        )
+        Some(parts.join(" + "))
     }
 
     pub fn equation(&self) -> Option<String> {
@@ -702,7 +705,13 @@ impl SkillData34 {
             TooltipType::MinimumCooldown => (b.value0 != 0).then(|| format_duration(&(b.value0 as u32))),
             TooltipType::IncreaseDurationOf => (b.value1 != 0).then(|| format_duration(&(b.value1 as u32))),
             TooltipType::Knockback => (b.value1 != 0).then(|| format_distance(&(b.value1 as u32))),
-            TooltipType::SelfHeal => Some(b.value1.to_string()),
+            TooltipType::SelfHeal => if let Some(eq) = self.equation() {
+                    Some(eq)
+                } else if b.value1 != 0 {
+                    Some(format!("{}", b.value1))
+                } else {
+                    None
+                }
             TooltipType::ReduceCostIncreaseRecovery => (b.value1 != 0).then(|| b.value1.to_string()),
             TooltipType::TickRate => (b.tick != 0).then(|| format_duration(&b.tick)),
             TooltipType::MagicalDamage
@@ -873,6 +882,14 @@ fn read_skill_records<R: Read + Seek>(
     state: &mut ParserState,
 ) -> io::Result<()> {
     loop {
+        // A chunk can end mid-record (seen: one stray 0x23 after the last record). Stop cleanly instead of erroring.
+        let remaining = state.size_of_skills_file.saturating_sub(file.tell()?);
+        if remaining < SKILLDATA_HEADER_SIZE {
+            if remaining > 0 {
+                eprintln!("Ignoring {remaining} trailing byte(s) at end of file (partial record header).");
+            }
+            break;
+        }
         match file.read_byte() {
             Err(_) => break,
             Ok(b) => {
@@ -947,6 +964,7 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
         bd.skill_line_id      = r.read_dword_be()?;
         debug_assert!(SkillLine::from_id(&bd.skill_line_id).is_some() || bd.skill_line_id == 0, "skill_line_id not known: {} for ability id {}", bd.skill_line_id, skill.ability_id1);
         bd.maybe_idk          = r.read_dword_be()?;
+        bd.uid                = r.read_dword64_be()?;
         bd.cast_time          = r.read_dword_be()?;
         bd.value0             = r.read_idword_be()?;
         bd.value1             = r.read_idword_be()?;
@@ -973,12 +991,12 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
     let flags_bytes = r.read_bytes(FLAGSIZE)?;
     skill.flags.copy_from_slice(&flags_bytes);
 
-    skill.size1 = r.read_dword_be()?;
+    skill.size1 = r.read_byte()? as u32;
     skill.link_types = (0..skill.size1)
         .map(|_| r.read_byte())
         .collect::<io::Result<_>>()?;
 
-    skill.size2      = r.read_dword_be()?;
+    skill.size2      = r.read_byte()? as u32;
     skill.causes_ids = (0..skill.size2)
         .map(|_| r.read_dword_be())
         .collect::<io::Result<_>>()?;
@@ -990,27 +1008,29 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
 
     for slot in skill.u4.iter_mut() { *slot = r.read_word_be()?; }
 
-    skill.size5 = r.read_dword_be()?;
+    skill.size5 = r.read_byte()? as u32;
     skill.list5.reserve(skill.size5 as usize);
     for _ in 0..skill.size5 {
         let mut entry = U5Data::default();
-        entry.s5a = r.read_dword_be()?;
+        entry.uid    = r.read_dword64_be()?;
+        entry.s5a = r.read_byte()? as u32;
         entry.d5a = (0..entry.s5a).map(|_| r.read_dword_be()).collect::<io::Result<_>>()?;
-        entry.s5b = r.read_dword_be()?;
+        entry.s5b = r.read_byte()? as u32;
         entry.d5b = (0..entry.s5b).map(|_| r.read_dword_be()).collect::<io::Result<_>>()?;
         skill.list5.push(entry);
     }
 
-    skill.num_tooltips = r.read_dword_be()?;
+    skill.num_tooltips = r.read_byte()? as u32;
     skill.tooltip_data.reserve(skill.num_tooltips as usize);
     for _ in 0..skill.num_tooltips {
         let mut td = TooltipData::default();
-        td.num_tooltip_types = r.read_dword_be()?;
+        td.uid               = r.read_dword64_be()?;
+        td.num_tooltip_types = r.read_byte()? as u32;
         td.tooltip_types     = (0..td.num_tooltip_types)
             .map(|_| r.read_dword_be())
             .collect::<io::Result<_>>()?;
         debug_assert!(td.tooltip_types.iter().all(|f| TooltipType::from_id(f).is_some()), "Tooltip type in {:?} didn't match for id {}", td.tooltip_types, skill.ability_id1);
-        td.num_tooltip_ids   = r.read_dword_be()?;
+        td.num_tooltip_ids   = r.read_byte()? as u32;
         td.tooltip_ids       = (0..td.num_tooltip_ids)
             .map(|_| r.read_dword_be())
             .collect::<io::Result<_>>()?;
@@ -1019,12 +1039,12 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
 
     for slot in skill.u6.iter_mut() { *slot = r.read_byte()?; }
 
-    skill.size6a = r.read_dword_be()?;
+    skill.size6a = r.read_byte()? as u32;
     skill.list6a = (0..skill.size6a)
         .map(|_| r.read_dword_be())
         .collect::<io::Result<_>>()?;
 
-    skill.size_tags = r.read_dword_be()?;
+    skill.size_tags = r.read_byte()? as u32;
     skill.ability_tags = (0..skill.size_tags)
         .map(|_| r.read_word_be())
         .collect::<io::Result<_>>()?;
@@ -1057,21 +1077,18 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
         .collect::<io::Result<_>>()?;
         p.u6 = r.read_byte()?;
         p.u7 = r.read_dword_be()?;
-        p.u8 = r.read_word_be()?;
     }
 
-    skill.size7 = r.read_word_be()?;
+    skill.size7 = r.read_byte()? as u16;
     skill.list7 = (0..skill.size7 as u32)
         .map(|_| r.read_dword_be())
         .collect::<io::Result<_>>()?;
 
-    skill.u8a = (0..4)
-        .map(|_| r.read_byte())
-        .collect::<io::Result<_>>()?;
+    skill.f8a = r.read_float_le()?; // was read as 4 raw bytes; it's a little-endian f32 (0.28..112.5 in real data)
     skill.icon_file_index = r.read_dword_be()?;
     skill.u8c = r.read_dword_be()?;
 
-    skill.size8 = r.read_dword_be()?;
+    skill.size8 = r.read_byte()? as u32;
     skill.list8 = (0..skill.size8)
         .map(|_| r.read_dword_be())
         .collect::<io::Result<_>>()?;
@@ -1083,13 +1100,14 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
         .map(|_| r.read_byte())
         .collect::<io::Result<_>>()?;
 
-    skill.size9 = r.read_dword_be()?;
+    skill.size9 = r.read_byte()? as u32;
     skill.list9.reserve(skill.size9 as usize);
     for _ in 0..skill.size9 {
         let mut entry = List9Data::default();
-        entry.size9a = r.read_dword_be()?;
+        entry.uid    = r.read_dword64_be()?;
+        entry.size9a = r.read_byte()? as u32;
         entry.list9a = (0..entry.size9a).map(|_| r.read_dword_be()).collect::<io::Result<_>>()?;
-        entry.size9b = r.read_dword_be()?;
+        entry.size9b = r.read_byte()? as u32;
         entry.list9b = (0..entry.size9b).map(|_| r.read_dword_be()).collect::<io::Result<_>>()?;
         skill.list9.push(entry);
     }
@@ -1098,13 +1116,14 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
     skill.half_width = r.read_word_be()?;
     for slot in skill.u10.iter_mut() { *slot = r.read_byte()?; }
 
-    skill.size11 = r.read_dword_be()?;
+    skill.size11 = r.read_byte()? as u32;
     skill.list11.reserve(skill.size11 as usize);
     for _ in 0..skill.size11 {
         let mut entry = List11Data::default();
-        entry.size11a = r.read_dword_be()?;
+        entry.uid     = r.read_dword64_be()?;
+        entry.size11a = r.read_byte()? as u32;
         entry.list11a = (0..entry.size11a).map(|_| r.read_dword_be()).collect::<io::Result<_>>()?;
-        entry.size11b = r.read_dword_be()?;
+        entry.size11b = r.read_byte()? as u32;
         entry.list11b = (0..entry.size11b).map(|_| r.read_dword_be()).collect::<io::Result<_>>()?;
         skill.list11.push(entry);
     }
@@ -1118,7 +1137,7 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
     };
     for slot in skill.u12.iter_mut() { *slot = r.read_byte()?; }
 
-    skill.size13 = r.read_dword_be()?;
+    skill.size13 = r.read_byte()? as u32;
     skill.list13 = r.read_bytes(skill.size13 as usize * 6)?;
 
     skill.u13 = U13Data {
@@ -1149,7 +1168,7 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
         u374_ability_id:    r.read_dword_be()?,
     };
 
-    skill.size19 = r.read_dword_be()?;
+    skill.size19 = r.read_byte()? as u32;
     skill.list19.reserve(skill.size19 as usize);
     debug_assert!(skill.size19 < 2, "size19 > 1");
     for _ in 0..skill.size19 {
@@ -1161,7 +1180,7 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
     }
     skill.u20 = r.read_dword_be()?;
 
-    skill.size21 = r.read_dword_be()?;
+    skill.size21 = r.read_byte()? as u32;
     skill.list21 = r.read_bytes(skill.size21 as usize * 5)?;
 
     skill.u22 = U22Data {
@@ -1172,7 +1191,7 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
     debug_assert!(Mechanic::from_id(&skill.mechanic).is_some(), "mechanic not known: {} for ability id {}", skill.mechanic, skill.ability_id1);
     skill.u23      = r.read_byte()?;
     for slot in skill.u24.iter_mut() { *slot = r.read_byte()?; }
-    skill.size25 = r.read_dword_be()?;
+    skill.size25 = r.read_byte()? as u32;
     skill.list25.reserve((skill.size25 * 7) as usize);
     for _ in 0..skill.size25 {
         let mut e = List25Entry::default();
@@ -1182,17 +1201,17 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
         e.u2 = r.read_byte()?;
         skill.list25.push(e);
     }
-    skill.size26 = r.read_dword_be()?;
+    skill.size26 = r.read_byte()? as u32;
     skill.list26.reserve(skill.size26 as usize);
     for _ in 0..skill.size26 {
         let mut e = List26Data::default();
         e.u2    = (0..4).map(|_| r.read_dword_be()).collect::<io::Result<_>>()?;
-        e.size3 = r.read_dword_be()?;
+        e.size3 = r.read_byte()? as u32;
         e.list3 = (0..e.size3).map(|_| r.read_dword_be()).collect::<io::Result<_>>()?;
         skill.list26.push(e);
     }
 
-    skill.size_coef = r.read_dword_be()?;
+    skill.size_coef = r.read_byte()? as u32;
     skill.coef.reserve(skill.size_coef as usize);
     for _ in 0..skill.size_coef {
         let mut c = SkillCoef::default();
