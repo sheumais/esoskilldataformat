@@ -79,8 +79,8 @@ pub struct PostSkillCoef {
     #[serde(skip_serializing_if = "is_zero_u16")]  pub u1: u16,
     #[serde(skip_serializing_if = "is_zero_u8")]   pub u2: u8,
     #[serde(skip_serializing_if = "is_empty_vec")] pub u3: Vec<u8>,
-    #[serde(skip_serializing_if = "is_zero_u8")]   pub u4: u8,
-    #[serde(skip_serializing_if = "is_empty_vec")] pub u5: Vec<u8>,
+    #[serde(skip_serializing_if = "is_zero_u32")]  pub u4: u32,
+    #[serde(skip_serializing_if = "is_zero_u8")]   pub u5: u8,
     #[serde(skip_serializing_if = "is_zero_u8")]   pub u6: u8,
     #[serde(skip_serializing_if = "is_zero_u32")]  pub u7: u32,
 }
@@ -681,6 +681,7 @@ impl SkillData34 {
                 | TooltipType::BonusUpToPercent
                 | TooltipType::ThresholdBelowHealthPercent
                 | TooltipType::TargetCap
+                | TooltipType::IncreasedDurationVsMonsters
         )
     }
 
@@ -748,6 +749,10 @@ impl SkillData34 {
                 let v = self.target_cap();
                 (v != 0).then(|| format!("{}", v))
             }
+            TooltipType::IncreasedDurationVsMonsters => {
+                let v = self.post.u4;
+                (v != 0).then(|| format_duration(&v))
+            }
             _ => None,
         }
     }
@@ -780,6 +785,7 @@ impl SkillData34 {
             TooltipType::BonusUpToPercent => self.bonus_up_to_pct() != 0,
             TooltipType::TargetCap => self.target_cap() != 0,
             TooltipType::ThresholdBelowHealthPercent => self.threshold_below_health_pct() != 0,
+            TooltipType::IncreasedDurationVsMonsters => self.post.u4 != 0,
             _ => false,
         }
     }
@@ -1071,10 +1077,8 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
         p.u3 = (0..4)
         .map(|_| r.read_byte())
         .collect::<io::Result<_>>()?;
-        p.u4 = r.read_byte()?;
-        p.u5 = (0..4)
-        .map(|_| r.read_byte())
-        .collect::<io::Result<_>>()?;
+        p.u4 = r.read_dword_be()?;
+        p.u5 = r.read_byte()?;
         p.u6 = r.read_byte()?;
         p.u7 = r.read_dword_be()?;
     }
