@@ -228,7 +228,8 @@ pub struct SkillData34 {
     #[serde(skip_serializing_if = "is_empty_vec")]              pub link_types:     Vec<u8>,
     #[serde(skip_serializing_if = "always_skip_serialization")] pub size2:          u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub causes_ids:     Vec<u32>,
-    #[serde(serialize_with = "serialize_array", skip_serializing_if = "is_empty_array")] pub u2a: [u8; U2ASIZE],
+    #[serde(skip_serializing_if = "is_zero_u8")]                pub u2a:            u8,
+    #[serde(skip_serializing_if = "is_zero_u32")]               pub u2b:            u32,
     #[serde(serialize_with = "serialize_array", skip_serializing_if = "is_empty_array")] pub u4: [u16; U4SIZE],
     #[serde(skip_serializing_if = "always_skip_serialization")] pub size5:          u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list5:          Vec<U5Data>,
@@ -311,7 +312,8 @@ impl Default for SkillData34 {
             link_types:     Vec::new(),
             size2:          0,
             causes_ids:     Vec::new(),
-            u2a:            [0u8; U2ASIZE],
+            u2a:            0,
+            u2b:            0,
             u4:             [0u16; U4SIZE],
             size5:          0,
             list5:          Vec::new(),
@@ -634,7 +636,6 @@ impl SkillData34 {
             used[i] = true;
             let (t1, c1) = terms[i];
 
-            // Find a later, unused term in the same group with an identical coefficient.
             let partner = (i + 1..terms.len())
                 .find(|&j| !used[j] && terms[j].1 == c1 && Self::is_pair(t1, terms[j].0));
 
@@ -888,7 +889,6 @@ fn read_skill_records<R: Read + Seek>(
     state: &mut ParserState,
 ) -> io::Result<()> {
     loop {
-        // A chunk can end mid-record (seen: one stray 0x23 after the last record). Stop cleanly instead of erroring.
         let remaining = state.size_of_skills_file.saturating_sub(file.tell()?);
         if remaining < SKILLDATA_HEADER_SIZE {
             if remaining > 0 {
@@ -1007,10 +1007,8 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
         .map(|_| r.read_dword_be())
         .collect::<io::Result<_>>()?;
 
-
-    let u2a = r.read_bytes(U2ASIZE)?;
-    skill.u2a.copy_from_slice(&u2a);
-
+    skill.u2a = r.read_byte()?;
+    skill.u2b = r.read_dword_be()?;
 
     for slot in skill.u4.iter_mut() { *slot = r.read_word_be()?; }
 
@@ -1088,7 +1086,7 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
         .map(|_| r.read_dword_be())
         .collect::<io::Result<_>>()?;
 
-    skill.f8a = r.read_float_le()?; // was read as 4 raw bytes; it's a little-endian f32 (0.28..112.5 in real data)
+    skill.f8a = r.read_float_le()?;
     skill.icon_file_index = r.read_dword_be()?;
     skill.u8c = r.read_dword_be()?;
 
