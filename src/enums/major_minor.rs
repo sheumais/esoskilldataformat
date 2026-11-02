@@ -79,11 +79,11 @@ major_minor_buffs! {
     MinorBrittle        = 11 => "Minor Brittle"         => 10,
     MajorBrittle        = 12 => "Major Brittle"         => 20,
     MinorFortitude      = 13 => "Minor Fortitude"       => 15,
-    MajorEndurance      = 14 => "Major Endurance"       => 30,
+    MajorFortitude      = 14 => "Major Fortitude"       => 30,
     MinorEndurance      = 15 => "Minor Endurance"       => 15,
-    MajorFortitude      = 16 => "Major Fortitude"       => 30,
-    // 17
-    // 18
+    MajorEndurance      = 16 => "Major Endurance"       => 30,
+    MinorIntellect      = 17 => "Minor Intellect"       => 15,
+    MajorIntellect      = 18 => "Major Intellect"       => 30,
     MinorHeroism        = 19 => "Minor Heroism"         => 1,
     MajorHeroism        = 20 => "Major Heroism"         => 3,
     MinorMending        = 21 => "Minor Mending"         => 8,
@@ -98,7 +98,7 @@ major_minor_buffs! {
     MajorMaim           = 30 => "Major Maim"            => 10,
     MinorDefile         = 31 => "Minor Defile"          => 6,
     MajorDefile         = 32 => "Major Defile"          => 12,
-    // 33
+    MinorMangle         = 33 => "Minor Mangle"          => 10,
     // 34
     MinorExpedition     = 35 => "Minor Expedition"      => 15,
     MajorExpedition     = 36 => "Major Expedition"      => 30,
@@ -111,13 +111,13 @@ major_minor_buffs! {
     MajorBerserk        = 43 => "Major Berserk"         => 10,
     MinorForce          = 44 => "Minor Force"           => 10,
     MajorForce          = 45 => "Major Force"           => 20,
-    // 46
-    // 47
+    MinorSlayer         = 46 => "Minor Slayer"          => 5,
+    MajorSlayer         = 47 => "Major Slayer"          => 10,
     MinorCourage        = 48 => "Minor Courage"         => 215,
     MajorCourage        = 49 => "Major Courage"         => 430,
     MinorToughness      = 50 => "Minor Toughness"       => 10,
-    // 51
-    // 52
+    MinorAegis          = 51 => "Minor Aegis"           => 5,
+    MajorAegis          = 52 => "Major Aegis"           => 10,
     // 53
     // 54
     Gallop              = 54 => "Gallop"                => 15,
@@ -129,4 +129,6 @@ major_minor_buffs! {
     MinorVulnerability  = 60 => "Minor Vulnerability"   => 5,
     MajorVulnerability  = 61 => "Major Vulnerability"   => 10,
     MinorTimidity       = 62 => "Minor Timidity"        => 1,
+    MinorVexation       = 64 => "Minor Vexation"        => 8,
+    MajorVexation       = 65 => "Major Vexation"        => 16,
 }

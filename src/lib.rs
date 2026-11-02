@@ -14,6 +14,7 @@ use crate::enums::skill_line::SkillLine;
 use crate::enums::tooltip_type::TooltipType;
 
 pub mod enums;
+pub mod champion_points;
 
 pub const FLAGSIZE:  usize = 177;
 pub const U2ASIZE:   usize = 5;
@@ -560,7 +561,12 @@ impl SkillData34 {
     pub fn is_toggled(&self) -> bool { self.flags[FLAG_TOGGLED] == 1 }
     pub fn is_cost_per_tick(&self) -> bool { self.flags[FLAG_COST_PER_TICK] == 1 }
 
-    pub fn execute(&self) -> Option<&ExecuteData> { self.list19.first() }
+    pub fn execute(&self) -> Option<&ExecuteData> { 
+        if let Some(a) = self.list19.first() {
+            if a.bonus_up_to_pct > 0 && a.threshold_below_health_pct > 0 {return Some(a)}
+        }
+        None
+    }
     pub fn threshold_below_health_pct(&self) -> u8 { self.execute().map_or(0, |e| e.threshold_below_health_pct) }
     pub fn bonus_up_to_pct(&self) -> u16 { self.execute().map_or(0, |e| e.bonus_up_to_pct) }
     pub fn target_cap(&self) -> u16 { self.pre.u0 }
@@ -706,7 +712,7 @@ impl SkillData34 {
             }
             TooltipType::MinimumCooldown => (b.value0 != 0).then(|| format_duration(&(b.value0 as u32))),
             TooltipType::IncreaseDurationOf => (b.value1 != 0).then(|| format_duration(&(b.value1 as u32))),
-            TooltipType::Knockback => (b.value1 != 0).then(|| format_distance(&(b.value1 as u32))),
+            TooltipType::Knockback => (b.value1 != 0).then(|| format_distance(&((b.value1).abs() as u32))),
             TooltipType::SelfHeal => if let Some(eq) = self.equation() {
                     Some(eq)
                 } else if b.value1 != 0 {
