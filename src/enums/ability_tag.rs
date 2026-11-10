@@ -43,6 +43,7 @@ macro_rules! ability_tags {
 
 ability_tags! {
     UIAffectingPassive = 0 => "UIAffectingPassive", // lockpicking, guard interactions, cyrodiil fighter's guild quests
+    Chain = 4 => "Chain",
     MundusBoon = 5 => "MundusBoon",
     PsijicOrderAbility = 8 => "PsijicOrderAbility",
     DestructionStaffAbility = 15 => "DestructionStaffAbility",
@@ -159,12 +160,12 @@ ability_tags! {
     WeaponAbilityShieldWall = 481 => "WeaponAbilityShieldWall",
     NegativeEffect = 484 => "NegativeEffect",
     Purge = 490 => "Purge",
+    WardenBearAbility = 493 => "WardenBearAbility",
     WardenFrostGate = 501 => "WardenFrostGate",
     Teleport = 510 => "Teleport",
     SkillLineWintersEmbraceAbility = 513 => "SkillLineWintersEmbraceAbility",
     SkillLineGreenBalanceAbility = 514 => "SkillLineGreenBalanceAbility",
     SkillLineAnimalCompanionsAbility = 515 => "SkillLineAnimalCompanionsAbility",
-    WardenBearAbility = 563 => "WardenBearAbility",
     BlinkChargeLeapTeleportPull = 531 => "BlinkChargeLeapTeleportPull",
     WeaponAbilityTwinSlashes2 = 593 => "WeaponAbilityTwinSlashes2",
     WeaponAbilityVolley2 = 609 => "WeaponAbilityVolley2",
@@ -186,6 +187,7 @@ ability_tags! {
     SkillLineLivingDeathAbility = 784 => "SkillLineLivingDeathAbility",
     HeavyAttackOverload = 785 => "HeavyAttackOverload",
     ImmobiliseSnareImmunity = 786 => "ImmobiliseSnareImmunity",
+    ImmobilisesOrSnares = 787 => "ImmobilisesOrSnares",
     CreatesCorpsesOnDeath = 789 => "CreatesCorpsesOnDeath",
     PuzzleCubeMovement = 793 => "PuzzleCubeMovement",
     ConsumesCorpses = 833 => "ConsumesCorpses",

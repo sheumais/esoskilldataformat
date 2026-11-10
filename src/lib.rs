@@ -19,7 +19,6 @@ pub mod champion_points;
 pub const FLAGSIZE:  usize = 177;
 pub const U2ASIZE:   usize = 5;
 pub const U4SIZE:    usize = 6;
-pub const U6SIZE:    usize = 33;
 pub const U8SIZE:    usize = 24;
 pub const U10SIZE:   usize = 14;
 pub const U11SIZE:   usize = 12;
@@ -190,6 +189,19 @@ pub struct U15Data {
 }
 
 #[derive(Debug, Default, Serialize, PartialEq, Clone)]
+pub struct U6Data {
+    #[serde(skip_serializing_if = "is_zero_u32")] pub u0:             u32,
+    #[serde(skip_serializing_if = "is_zero_u32")] pub u1_ability_id:  u32,
+    #[serde(skip_serializing_if = "is_zero_u32")] pub u2_ability_id:  u32,
+    #[serde(skip_serializing_if = "is_zero_u32")] pub u3_ability_id:  u32,
+    #[serde(skip_serializing_if = "is_zero_u32")] pub u4_ability_id:  u32,
+    #[serde(skip_serializing_if = "is_zero_u32")] pub u5_ability_id:  u32,
+    #[serde(skip_serializing_if = "is_zero_u32")] pub u6_ability_id:  u32,
+    #[serde(skip_serializing_if = "is_zero_u8")]  pub u7:             u8,
+    #[serde(skip_serializing_if = "is_zero_u32")] pub u8_ability_id:  u32,
+}
+
+#[derive(Debug, Default, Serialize, PartialEq, Clone)]
 pub struct U18Data {
     #[serde(skip_serializing_if = "is_zero_u8")]  pub weapon_config_type:   u8,
     #[serde(skip_serializing_if = "is_zero_f32")] pub f36c:                 f32,
@@ -236,7 +248,7 @@ pub struct SkillData34 {
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list5:          Vec<U5Data>,
     #[serde(skip_serializing_if = "is_zero_u32")]               pub num_tooltips:   u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub tooltip_data:   Vec<TooltipData>,
-    #[serde(serialize_with = "serialize_array", skip_serializing_if = "is_empty_array")] pub u6: [u8; U6SIZE],
+    #[serde(skip_serializing_if = "is_default")]                pub u6:             U6Data,
     #[serde(skip_serializing_if = "always_skip_serialization")] pub size6a:         u32,
     #[serde(skip_serializing_if = "is_empty_vec")]              pub list6a:         Vec<u32>,
     #[serde(skip_serializing_if = "always_skip_serialization")] pub size_tags:      u32,
@@ -320,7 +332,7 @@ impl Default for SkillData34 {
             list5:          Vec::new(),
             num_tooltips:   0,
             tooltip_data:   Vec::new(),
-            u6:             [0u8; U6SIZE],
+            u6:             U6Data::default(),
             size6a:         0,
             list6a:         Vec::new(),
             size_tags:      0,
@@ -587,78 +599,8 @@ impl SkillData34 {
         }
     }
 
-    fn is_weapon_spell(t: u8) -> bool { matches!(t, 25 | 35) }
-    fn is_resource(t: u8) -> bool { matches!(t, 4 | 29) }
-    fn is_resist(t: u8) -> bool { matches!(t, 13 | 22) }
-
-    fn is_pair(a: u8, b: u8) -> bool {
-        a != b
-            && ((Self::is_weapon_spell(a) && Self::is_weapon_spell(b))
-                || (Self::is_resource(a) && Self::is_resource(b))
-                || (Self::is_resist(a) && Self::is_resist(b)))
-    }
-
-    fn paired_term(t1: u8, t2: u8, coef: f32) -> String {
-        match (t1, t2) {
-            (25, 35) | (35, 25) => format!("{coef}×MaxPower"),
-            (4, 29) | (29, 4) => format!("{coef}×MaxResource"),
-            (22, 13) | (13, 22) => format!("{coef}×MaxResist"),
-            _ => format!(
-                "{coef}×max({}, {})",
-                CoefficientType::from_id(&t1).map_or("unknown", |t| t.as_str()),
-                CoefficientType::from_id(&t2).map_or("unknown", |t| t.as_str()),
-            ),
-        }
-    }
-
-    fn render_coef(c: &SkillCoef) -> Option<String> {
-        let terms: Vec<(u8, f32)> = [
-            (c.type1, c.coef1),
-            (c.type2, c.coef2),
-            (c.type3, c.coef3),
-            (c.type4, c.coef4),
-        ]
-        .into_iter()
-        .filter(|(ty, coef)| *ty > 0 && *coef != 0.0)
-        .collect();
-
-        if terms.is_empty() {
-            return None;
-        }
-
-        let coef_str = |id: u8, coef: f32| {
-            CoefficientType::from_id(&id)
-                .map(|t| format!("{coef}×{}", t.as_str()))
-                .unwrap_or_else(|| format!("{coef}×unknown({id})"))
-        };
-
-        let mut used = vec![false; terms.len()];
-        let mut parts = Vec::with_capacity(terms.len());
-
-        for i in 0..terms.len() {
-            if used[i] {
-                continue;
-            }
-            used[i] = true;
-            let (t1, c1) = terms[i];
-
-            let partner = (i + 1..terms.len())
-                .find(|&j| !used[j] && terms[j].1 == c1 && Self::is_pair(t1, terms[j].0));
-
-            match partner {
-                Some(j) => {
-                    used[j] = true;
-                    parts.push(Self::paired_term(t1, terms[j].0, c1));
-                }
-                None => parts.push(coef_str(t1, c1)),
-            }
-        }
-
-        Some(parts.join(" + "))
-    }
-
     pub fn equation(&self) -> Option<String> {
-        let parts: Vec<String> = self.coef.iter().filter_map(Self::render_coef).collect();
+        let parts: Vec<String> = self.coef.iter().filter_map(SkillCoef::render).collect();
         if parts.is_empty() { None } else { Some(parts.join(" AND ")) }
     }
 
@@ -1047,7 +989,18 @@ fn read_skill_record34_inner<R: Read + Seek>(r: &mut ByteReader<R>, expected_ind
         skill.tooltip_data.push(td);
     }
 
-    for slot in skill.u6.iter_mut() { *slot = r.read_byte()?; }
+    {
+        let p = &mut skill.u6;
+        p.u0            = r.read_dword_be()?;
+        p.u1_ability_id = r.read_dword_be()?;
+        p.u2_ability_id = r.read_dword_be()?;
+        p.u3_ability_id = r.read_dword_be()?;
+        p.u4_ability_id = r.read_dword_be()?;
+        p.u5_ability_id = r.read_dword_be()?;
+        p.u6_ability_id = r.read_dword_be()?;
+        p.u7            = r.read_byte()?;
+        p.u8_ability_id = r.read_dword_be()?;
+    }
 
     skill.size6a = r.read_byte()? as u32;
     skill.list6a = (0..skill.size6a)
