@@ -5,7 +5,6 @@ use serde::Serialize;
 use eso_common::*;
 use crate::enums::ability_tag::AbilityTag;
 use crate::enums::ability_type::AbilityType;
-use crate::enums::coefficient_type::CoefficientType;
 use crate::enums::damage_type::DamageType;
 use crate::enums::flags::{FLAG_COST_PER_TICK, FLAG_TOGGLED};
 use crate::enums::major_minor::MajorMinorBuff;
@@ -15,6 +14,7 @@ use crate::enums::tooltip_type::TooltipType;
 
 pub mod enums;
 pub mod champion_points;
+pub mod player_ability;
 
 pub const FLAGSIZE:  usize = 177;
 pub const U2ASIZE:   usize = 5;
